@@ -22,5 +22,20 @@ cd ..\..
 echo Installing Python dependencies...
 python -m pip install -r data\requirements.txt
 
-echo Setup complete! Run start-dev.bat to launch the dev servers.
-pause
+:dependencies_ready
+
+if not exist ".env" (
+  copy /Y ".env.example" ".env" >nul
+  if errorlevel 1 (
+    echo [FAIL] Could not create .env from .env.example.
+    exit /b 1
+  )
+  echo [OK] Created .env from .env.example
+) else (
+  echo [OK] .env already exists
+)
+
+echo.
+echo [OK] CMC development setup is complete.
+echo [NEXT] Run npm run dev to launch the frontend and API.
+exit /b 0
