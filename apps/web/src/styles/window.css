@@ -154,11 +154,29 @@
 
 .viewport-stack { min-width: 0; min-height: 0; border: var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
 .expanded-window .viewport-stack { display: flex; flex-direction: column; }
-.main-viewport { flex: 1; min-width: 0; min-height: 0; padding: var(--content-padding); overflow: hidden; outline: none; }
-.stage-layout { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.stage-content { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; }
-.stage-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 24px; }
-.shell--landing .stage-content { display: flex; align-items: center; }
+.main-viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--content-padding);
+  overflow: hidden;
+  outline: none;
+}
+.main-viewport > * { max-width: 100%; min-width: 0; }
+.main-viewport > .viewport-actions { max-width: calc(100% - 48px); }
+.journey-panel, .preference-panel, .budget-panel { max-width: 100%; min-width: 0; }
+.main-viewport.has-viewport-actions { padding-bottom: calc(var(--content-padding) + 24px); }
+.viewport-actions {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
 
 /* Landing-only composition treatment. The application geometry above stays shared. */
 .shell--landing .start-panel { width: 100%; min-width: 0; }
@@ -210,10 +228,9 @@
   .rail-step.active { padding: 4px 0; border-width: 3px; }
   .rail-number { width: 24px; height: 24px; font-size: 10px; }
   .main-viewport { min-height: 0; padding: 24px 16px; overflow: visible; }
-  .stage-layout { height: auto; min-height: 100%; }
-  .stage-content { overflow: visible; }
-  .stage-actions { flex-wrap: wrap; gap: 10px; padding-top: 20px; }
-  .stage-actions > button { flex: 1 1 auto; }
+  .main-viewport.has-viewport-actions { padding-bottom: 24px; }
+  .viewport-actions { position: static; justify-content: flex-end; max-width: none; margin-top: 24px; }
+  .viewport-actions > button { flex: 1 1 auto; }
   .shell--landing .welcome-composition { grid-template-columns: minmax(0, 1fr); gap: 24px; min-height: 0; }
   .shell--landing .welcome-copy h2 { font-size: 48px; }
   .shell--landing .welcome-copy .highlight-word { font-size: clamp(38px, 12vw, 48px); }
