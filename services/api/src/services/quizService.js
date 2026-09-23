@@ -13,8 +13,7 @@ function tagCounts(items) {
 }
 
 function parseJson(text) {
-  const cleaned = String(text || '').replace(/^\s*```(?:json)?/i, '').replace(/```\s*$/, '').trim();
-  return JSON.parse(cleaned);
+  return JSON.parse(text);
 }
 
 function fallbackQuestion(topic, tags, remainingCount) {
@@ -73,7 +72,38 @@ async function askCerebras({ topic, tags, questionCount }) {
     body: JSON.stringify({
       model,
       temperature: 0.9,
-      max_tokens: 450,
+      reasoning_effort: 'low',
+      max_completion_tokens: 800,
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'quiz_question',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              question: { type: 'string' },
+              options: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    label: { type: 'string' },
+                    tags: {
+                      type: 'array',
+                      items: { type: 'string' },
+                    },
+                  },
+                  required: ['label', 'tags'],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ['question', 'options'],
+            additionalProperties: false,
+          },
+        },
+      },
       messages: [
         {
           role: 'system',
@@ -91,9 +121,7 @@ ${tagSummary}
 The visible answer should make a plausible association with its tags, but should NOT literally name the tags, products, shopping categories, inventory, or filtering.
 
 Prefer different tags across the four options.
-
-Return exactly:
-{"question":"...","options":[{"label":"...","tags":["..."]},{"label":"...","tags":["..."]},{"label":"...","tags":["..."]},{"label":"...","tags":["..."]}]}`,
+Return one question object using the response format.`,
         },
       ],
     }),
@@ -102,7 +130,19 @@ Return exactly:
   if (!response.ok) throw new Error(`Cerebras returned ${response.status}.`);
 
   const body = await response.json();
-  return parseJson(body.choices?.[0]?.message?.content);
+  const choice = body.choices?.[0];
+  const finishReason = choice?.finish_reason || 'unknown';
+  console.info(`[quiz] Cerebras finish reason: ${finishReason}`);
+  const content = choice?.message?.content;
+  if (typeof content !== 'string' || !content.trim()) {
+    throw new Error(`Cerebras returned no quiz content (finish_reason: ${finishReason}).`);
+  }
+
+  try {
+    return parseJson(content);
+  } catch {
+    throw new Error(`Cerebras returned invalid quiz JSON (finish_reason: ${finishReason}).`);
+  }
 }
 
 export async function nextQuizQuestion(payload = {}) {
