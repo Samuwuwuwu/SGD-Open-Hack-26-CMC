@@ -1,0 +1,22 @@
+{
+  "name": "@cmc/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --configLoader runner",
+    "build": "vite build --configLoader runner",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "eslint": "^9.35.0",
+    "eslint-plugin-react-hooks": "^6.1.1",
+    "vite": "^8.1.0"
+  }
+}
