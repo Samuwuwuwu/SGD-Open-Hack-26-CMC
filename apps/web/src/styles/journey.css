@@ -74,3 +74,25 @@
   .welcome-composition { min-height: 0; }
   .welcome-art { min-height: 290px; }
 }
+
+
+/* Adaptive quiz */
+.quiz-kicker { margin: 0 0 10px; font-family: var(--font-mono); font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+.topic-grid, .quiz-answer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 24px 0; }
+.topic-chip { min-height: 72px; font-size: 16px; }
+.quiz-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 26px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+.quiz-topic-button { padding: 7px 10px; border: 2px solid var(--ink); border-radius: 6px; background: var(--lime); box-shadow: 2px 2px 0 var(--ink); font: inherit; font-weight: 800; cursor: pointer; }
+.quiz-question { max-width: 760px; margin-bottom: 26px; font-size: clamp(30px, 4vw, 48px) !important; line-height: 1.05; }
+.quiz-answer { display: flex; align-items: center; gap: 14px; min-height: 84px; padding: 16px; border: var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); font-size: 16px; font-weight: 800; text-align: left; cursor: pointer; }
+.quiz-answer:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+.quiz-answer:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+.answer-letter { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 50%; background: var(--cyan); font-family: var(--font-mono); }
+.quiz-loading { min-height: 280px; display: grid; place-items: center; align-content: center; gap: 14px; text-align: center; }
+.quiz-loading h2 { margin: 0; }
+.quiz-spinner { display: block; font-size: 54px; animation: quiz-spin .8s linear infinite; }
+@keyframes quiz-spin { to { transform: rotate(360deg); } }
+@media (max-width: 767px) {
+  .topic-grid, .quiz-answer-grid { grid-template-columns: 1fr; }
+  .quiz-answer { min-height: 66px; font-size: 14px; }
+  .quiz-meta { align-items: flex-start; }
+}
