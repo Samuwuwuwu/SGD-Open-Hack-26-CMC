@@ -1,5 +1,5 @@
 .drops-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.drops-heading h2 { font-size: 44px; }
+.drops-heading h2 { font-size: 44px; line-height: 1.23; }
 .candidate-count, .drop-category, .discount-badge, .match-tags > span { padding: 5px 10px; border: 2px solid var(--ink); border-radius: 9999px; box-shadow: 2px 2px 0 var(--ink); background: var(--lime); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .candidate-count { white-space: nowrap; background: var(--cyan); transform: rotate(-3deg); }
 .drop-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -59,7 +59,7 @@
   .impact-metrics span { font-size: 8px; }
 }
 @media (min-width: 1200px) and (max-height: 900px) {
-  .drops-heading h2 { font-size: 34px; line-height: 1.05; }
+  .drops-heading h2 { font-size: 34px; line-height: 1.23; }
   .drops-section > .panel-copy { margin-bottom: 14px; }
   .drop-grid { gap: 12px; }
   .drop-art { height: 120px; margin: 8px 8px 0; }
@@ -97,20 +97,20 @@
 .mystery-section > .panel-copy { max-width: none; }
 .mystery-grid { display: grid; grid-template-columns: repeat(var(--box-count), minmax(0, 1fr)); gap: 12px; }
 .mystery-card { display: flex; flex-direction: column; min-width: 0; border: var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
-.mystery-box-art { --box-colour: var(--cyan); display: grid; place-items: center; align-content: center; height: 105px; border-bottom: var(--border); background: var(--inset); }
+.mystery-box-art { --box-colour: var(--cyan); display: grid; place-items: center; align-content: center; height: 94px; border-bottom: var(--border); background: var(--inset); }
 .mystery-box-art-1 { --box-colour: var(--lime); }
 .mystery-box-art-2 { --box-colour: var(--magenta); }
 .mystery-box-art-3 { --box-colour: var(--orange); }
 .mystery-box-art-4 { --box-colour: var(--cyan); }
 .mystery-box-lid { z-index: 1; display: block; width: 88px; height: 18px; border: 3px solid var(--ink); border-radius: 3px; background: var(--box-colour); box-shadow: 3px 3px 0 var(--ink); transform: translateY(4px) rotate(-7deg); }
 .mystery-box-body { display: grid; place-items: center; width: 78px; height: 63px; border: 3px solid var(--ink); border-radius: 2px 2px 6px 6px; background: var(--box-colour); box-shadow: 5px 5px 0 var(--ink); font-family: var(--font-mono); font-size: 38px; font-weight: 800; line-height: 1; }
-.mystery-card-content { display: flex; flex: 1; flex-direction: column; min-width: 0; padding: 12px; }
+.mystery-card-content { display: flex; flex: 1; flex-direction: column; min-width: 0; padding: 8px; }
 .mystery-card h3 { margin-bottom: 6px; font-family: var(--font-mono); font-size: 17px; }
 .mystery-opened-label { display: inline-block; margin-left: 4px; padding: 2px 5px; border: 2px solid var(--ink); border-radius: 99px; background: var(--lime); font-size: 8px; vertical-align: middle; text-transform: uppercase; }
 .mystery-card.opened .mystery-box-lid { transform: translateY(-8px) rotate(-12deg); }
-.mystery-teaser { min-height: 50px; margin-bottom: 8px; font-size: 12px; line-height: 1.35; }
-.mystery-clues { margin: 0 0 12px; }
-.mystery-clues > div { padding: 6px 0; border-top: 1px solid var(--ink); }
+.mystery-teaser { min-height: 36px; margin-bottom: 6px; font-size: 12px; line-height: 1.35; }
+.mystery-clues { margin: 0 0 6px; }
+.mystery-clues > div { padding: 4px 0; border-top: 1px solid var(--ink); }
 .mystery-clues dt { margin-bottom: 2px; font-family: var(--font-mono); font-size: 9px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .mystery-clues dd { margin: 0; font-size: 11px; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
 .mystery-choose { width: 100%; min-height: 38px; margin-top: auto; padding: 7px 5px; gap: 4px; font-size: 10px; white-space: nowrap; }
@@ -122,7 +122,25 @@
   .mystery-teaser { min-height: 0; }
 }
 
+@media (min-width: 1200px) and (max-height: 760px) {
+  .drops-heading h2 { font-size: 34px; line-height: 1.23; }
+  .drops-section > .panel-copy { margin-bottom: 8px; }
+  .mystery-box-art { height: 66px; }
+  .mystery-box-lid { width: 74px; height: 14px; }
+  .mystery-box-body { width: 66px; height: 48px; font-size: 30px; }
+  .mystery-card-content { padding: 6px; }
+  .mystery-card h3 { margin-bottom: 4px; }
+  .mystery-teaser { min-height: 24px; margin-bottom: 4px; }
+  .mystery-clues { margin-bottom: 4px; }
+  .mystery-clues > div { padding: 1px 0; }
+  .mystery-choose { min-height: 34px; padding-block: 5px; }
+  .reveal-art, .reveal-art .product-illustration { min-height: 150px; }
+  .reveal-product-image { min-height: 150px; max-height: 150px; }
+  .impact-metrics strong { width: 56px; height: 56px; }
+}
+
 .unboxing-stage, .unboxing-error { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; text-align: center; }
+.main-viewport.has-viewport-actions > .unboxing-stage { min-height: 0; flex: 1 0 auto; }
 .unboxing-copy h2 { margin-bottom: 12px; font-size: clamp(34px, 4vw, 52px); }
 .unboxing-copy .panel-copy { max-width: none; margin-bottom: 18px; }
 .unboxing-scene { position: relative; display: grid; place-items: center; width: min(100%, 620px); height: clamp(220px, 34svh, 310px); border: 4px solid var(--ink); border-radius: 12px; background: var(--inset); box-shadow: inset 5px 5px 0 var(--ink); overflow: hidden; isolation: isolate; }

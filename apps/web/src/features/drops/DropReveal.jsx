@@ -5,10 +5,14 @@ const impactPriceFormatter = new Intl.NumberFormat('en-SG', {
   minimumSignificantDigits: 2,
   maximumSignificantDigits: 2,
 });
+const budgetDifferenceFormatter = new Intl.NumberFormat('en-SG', {
+  maximumFractionDigits: 2,
+});
 
 function DropReveal({ drop, budget, preferences, preferenceOptions, claimed }) {
   const matchingPreferences = preferenceOptions.filter((option) => preferences.includes(option.value) && drop.tags.includes(option.value));
   const belowRetail = impactPriceFormatter.format(Math.max(0, drop.retailPrice - drop.availablePrice));
+  const remainingBudget = budgetDifferenceFormatter.format(Math.max(0, budget - drop.availablePrice));
 
   return (
     <section className="reveal-panel">
@@ -27,7 +31,7 @@ function DropReveal({ drop, budget, preferences, preferenceOptions, claimed }) {
       </div>
       <div className="match-reasons">
         <h3><span aria-hidden="true">&#10022;</span> Why this drop</h3>
-        <p>{budget === drop.availablePrice ? `Right on your $${budget} budget.` : `$${budget - drop.availablePrice} under your $${budget} budget \u2014 a little room to spare.`}</p>
+        <p>{budget === drop.availablePrice ? `Right on your $${budget} budget.` : `$${remainingBudget} under your $${budget} budget \u2014 a little room to spare.`}</p>
         {matchingPreferences.length > 0 ? <div className="match-tags">{matchingPreferences.map((option) => <span key={option.value}>{option.icon} {option.label}</span>)}</div> : <p>A discovery within your range, with no shared vibe tags.</p>}
         {drop.constraints?.size?.length > 0 && <p>Available sizes: {drop.constraints.size.join(', ')}</p>}
         {drop.constraints?.dietary?.length > 0 && <p>Dietary information: {drop.constraints.dietary.join(', ')}</p>}
