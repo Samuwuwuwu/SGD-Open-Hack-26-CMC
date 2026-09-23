@@ -8,7 +8,7 @@ This repository is intentionally small and demo-first. The current golden path i
 
 - `apps/web/` — React + Vite customer prototype.
 - `services/api/` — Express API, demo inventory, and matching seams.
-- `setup-dev.bat`, `start-dev.bat`, `validate-local.bat` — local lifecycle commands.
+- `setup-dev.bat`, `validate-local.bat` — local lifecycle commands.
 
 ## First-time setup
 
@@ -29,12 +29,6 @@ npm run dev
 ```
 
 This starts both the backend API (`http://localhost:3001`) and the frontend (`http://localhost:5173`) concurrently with unified logs. You can run this command from the repository root, `apps/web`, or `services/api`. Stop both at any time with `Ctrl+C`.
-
-Alternatively, if you prefer dedicated Windows terminal windows:
-
-```bat
-start-dev.bat
-```
 
 Individual service commands are also available:
 - `npm run dev:web` — Frontend only

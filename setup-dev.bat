@@ -63,5 +63,5 @@ if not exist ".env" (
 
 echo.
 echo [OK] CMC development setup is complete.
-echo [NEXT] Run start-dev.bat to launch the frontend and API.
+echo [NEXT] Run npm run dev to launch the frontend and API.
 exit /b 0
