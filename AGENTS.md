@@ -17,6 +17,7 @@ Optimize for the shortest correct path to a reliable demo. Keep the concept easy
 - `apps/web/` owns presentation and browser interaction.
 - `apps/web/src/services/` owns frontend API access; do not scatter `fetch` through components.
 - `services/api/` owns server-side product logic and future provider integrations.
+- `data/inventory.xlsx` is the committed demo inventory source; keep product facts in that workbook and let the API normalize them.
 - API routes stay thin; matching and other business logic belong in API services/domain modules.
 - Avoid duplicate frontend/backend implementations of the same product rule.
 

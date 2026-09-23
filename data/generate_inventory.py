@@ -1,88 +1,88 @@
 import pandas as pd
-import random
 from datetime import datetime, timedelta
 
-# Seed for consistent data generation
-random.seed(42)
 
-PRODUCT_TEMPLATES = [
-    # Fashion - Northstar Apparel / Common Ground
-    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "outerwear", "name": "Oversized Utility Jacket", "base_price": 89.90, "sizes": "S|M|L", "colours": "black|olive", "tags": "oversized|minimal|streetwear|practical", "reasons": ["season_end", "overproduction"]},
-    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "tops", "name": "Heavyweight Boxy Tee", "base_price": 39.90, "sizes": "M|L|XL", "colours": "white|navy", "tags": "minimal|streetwear|basics|casual", "reasons": ["overproduction"]},
-    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "bottoms", "name": "Pleated Cropped Trousers", "base_price": 69.90, "sizes": "S|M", "colours": "charcoal|beige", "tags": "formal|minimal|clean|workwear", "reasons": ["season_end"]},
-    {"provider": "Common Ground", "category": "fashion", "subcategory": "outerwear", "name": "Recycled Fleece Pullover", "base_price": 79.00, "sizes": "XS|S|M|L", "colours": "cream|forest_green", "tags": "cozy|outdoor|sustainable|casual", "reasons": ["overproduction"]},
-    {"provider": "Common Ground", "category": "fashion", "subcategory": "accessories", "name": "Canvas Tote Bag", "base_price": 24.90, "sizes": "ONE_SIZE", "colours": "natural|black", "tags": "practical|minimal|daily|sustainable", "reasons": ["surplus_stock"]},
-    {"provider": "Common Ground", "category": "fashion", "subcategory": "tops", "name": "Striped Organic Cotton Longsleeve", "base_price": 45.00, "sizes": "XXL", "colours": "blue_white", "tags": "casual|classic|nautical", "reasons": ["odd_sizes_left"]},
+PRODUCTS = [
+    # Fashion
+    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "outerwear", "name": "Oversized Utility Jacket", "price": 89.90, "stock": 7, "sizes": "S|M|L", "colours": "black|olive", "tags": "bold|edgy|fashion|practical|adventurous|streetwear", "reason": "season_end"},
+    {"provider": "Common Ground", "category": "fashion", "subcategory": "knitwear", "name": "Ribbed Everyday Cardigan", "price": 58.00, "stock": 9, "sizes": "S|M|L", "colours": "oat|forest_green", "tags": "cozy|classic|fashion|comfort|natural|clean", "reason": "overproduction"},
+    {"provider": "Common Ground", "category": "fashion", "subcategory": "accessories", "name": "Patchwork Market Tote", "price": 32.00, "stock": 14, "sizes": "ONE_SIZE", "colours": "natural|colourful", "tags": "practical|minimal|fashion|portable|shareable|playful", "reason": "surplus_stock"},
+    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "bottoms", "name": "Pleated Cropped Trousers", "price": 69.90, "stock": 4, "sizes": "S|M", "colours": "charcoal|beige", "tags": "classic|clean|fashion|practical|minimal", "reason": "season_end"},
+    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "costume", "name": "Neon Yellow Fishnet Vest", "price": 49.90, "stock": 1, "sizes": "XXS", "colours": "neon_yellow", "tags": "edgy|dark|fashion|bold|niche|rave", "reason": "deadstock", "active": False},
 
-    # Cosmetics - Glow Theory
-    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "lip Care", "name": "Berry Hydrating Lip Tint", "base_price": 28.00, "sizes": "", "colours": "berry|rose", "tags": "bold|colourful|beauty|compact", "reasons": ["repackaging"]},
-    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "skincare", "name": "Hyaluronic Acid Serum 50ml", "base_price": 42.00, "sizes": "", "colours": "clear", "tags": "skincare|hydration|daily|clean_beauty", "reasons": ["overstock"]},
-    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "skincare", "name": "Calming Green Tea Clay Mask", "base_price": 34.00, "sizes": "", "colours": "green", "tags": "skincare|self_care|relaxing|detox", "reasons": ["season_end"]},
+    # Cosmetics
+    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "lip care", "name": "Berry Hydrating Lip Tint", "price": 28.00, "stock": 12, "colours": "berry|rose", "tags": "bold|colourful|beauty|portable|playful|cute", "reason": "repackaging"},
+    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "skincare", "name": "Hyaluronic Acid Serum 50ml", "price": 42.00, "stock": 8, "colours": "clear", "tags": "clean|calm|beauty|natural|practical|skincare", "reason": "overstock"},
+    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "skincare", "name": "Calming Green Tea Clay Mask", "price": 34.00, "stock": 10, "colours": "green", "tags": "calm|natural|beauty|cozy|clean|skincare", "reason": "season_end"},
+    {"provider": "Glow Theory", "category": "cosmetics", "subcategory": "body care", "name": "Citrus Hand Cream Duo", "price": 22.00, "stock": 16, "colours": "yellow|white", "tags": "cute|portable|beauty|natural|clean|shareable", "reason": "packaging_update"},
 
-    # Food - Munch Lab & Sunny Side Bakery
-    {"provider": "Munch Lab", "category": "food", "subcategory": "snacks", "name": "Truffle & Sea Salt Mushroom Crisps (Pack of 3)", "base_price": 15.00, "sizes": "", "colours": "", "tags": "savory|gourmet|crunchy|snack", "dietary": "vegan|gluten_free", "allergens": "none", "reasons": ["short_shelf_life"]},
-    {"provider": "Munch Lab", "category": "food", "subcategory": "drinks", "name": "Sparkling Adaptogen Botanical Elixir", "base_price": 22.00, "sizes": "", "colours": "", "tags": "wellness|refreshing|low_sugar|modern", "dietary": "vegan|halal", "allergens": "none", "reasons": ["overproduction"]},
-    {"provider": "Sunny Side Bakery", "category": "food", "subcategory": "pastries", "name": "Chocolate Almond Croissant Box (4-Pack)", "base_price": 18.00, "sizes": "", "colours": "", "tags": "sweet|comfort|shareable|indulgent", "dietary": "vegetarian", "allergens": "gluten|milk|nuts", "reasons": ["daily_surplus"]},
+    # Food and snacks
+    {"provider": "Munch Lab", "category": "food", "subcategory": "snacks", "name": "Truffle Sea Salt Mushroom Crisps", "price": 15.00, "stock": 18, "tags": "food|shareable|adventurous|bold|vegan", "dietary": "vegan|gluten_free", "allergens": "none", "reason": "short_shelf_life"},
+    {"provider": "Munch Lab", "category": "food", "subcategory": "drinks", "name": "Sparkling Botanical Elixir", "price": 22.00, "stock": 13, "tags": "food|energetic|adventurous|portable|vegan", "dietary": "vegan|halal", "allergens": "none", "reason": "overproduction"},
+    {"provider": "Sunny Side Bakery", "category": "food", "subcategory": "pastries", "name": "Chocolate Almond Croissant Box", "price": 18.00, "stock": 5, "tags": "food|cozy|comfort|shareable|classic", "dietary": "vegetarian", "allergens": "gluten|milk|nuts", "reason": "daily_surplus"},
+    {"provider": "Good Loop Pantry", "category": "food", "subcategory": "snacks", "name": "Citrus Oat Snack Box", "price": 19.00, "stock": 11, "tags": "food|practical|shareable|playful|vegan", "dietary": "vegan", "allergens": "gluten", "reason": "short_shelf_life"},
+    {"provider": "Good Loop Pantry", "category": "food", "subcategory": "snacks", "name": "Herbed Lentil Crisp Kit", "price": 21.00, "stock": 9, "tags": "food|practical|natural|shareable|vegan", "dietary": "vegan", "allergens": "none", "reason": "surplus_stock"},
 
-    # Home Goods - Nomad Home
-    {"provider": "Nomad Home", "category": "home goods", "subcategory": "decor", "name": "Hand-Poured Soy Wax Candle (Amber & Moss)", "base_price": 32.00, "sizes": "", "colours": "amber", "tags": "cozy|aroma|home|relaxing", "reasons": ["packaging_update"]},
-    {"provider": "Nomad Home", "category": "home goods", "subcategory": "kitchen", "name": "Ceramic Matte Mug Set of 2", "base_price": 38.00, "sizes": "", "colours": "terracotta|sand", "tags": "minimal|aesthetic|kitchen|daily", "reasons": ["minor_packaging_damage"]},
+    # Lifestyle
+    {"provider": "Little Orbit", "category": "lifestyle", "subcategory": "gardening", "name": "Pocket Garden Starter", "price": 32.00, "stock": 6, "colours": "green|terracotta", "tags": "natural|calm|home|decorative|playful|slow", "reason": "season_end"},
+    {"provider": "Trail & Tide", "category": "lifestyle", "subcategory": "travel", "name": "Compact Travel Blanket", "price": 48.00, "stock": 5, "colours": "navy|sand", "tags": "cozy|portable|comfort|practical|calm|adventurous", "reason": "overproduction"},
+    {"provider": "Little Orbit", "category": "lifestyle", "subcategory": "wellness", "name": "Lavender Bath Soak Pouch", "price": 26.00, "stock": 8, "colours": "lavender", "tags": "calm|cozy|natural|beauty|shareable|slow", "reason": "packaging_update"},
+    {"provider": "Trail & Tide", "category": "lifestyle", "subcategory": "hydration", "name": "Recycled Steel Water Bottle", "price": 36.00, "stock": 10, "colours": "blue|silver", "tags": "practical|portable|energetic|natural|shareable", "reason": "discontinued_colour"},
 
-    # Electronics & Lifestyle - PocketWorks / Paper Moon
-    {"provider": "PocketWorks", "category": "electronics", "subcategory": "audio", "name": "Compact Wireless Earbuds", "base_price": 59.90, "sizes": "", "colours": "matte_black", "tags": "tech|audio|gadget|portable|daily", "reasons": ["discontinued_color"]},
-    {"provider": "PocketWorks", "category": "electronics", "subcategory": "chargers", "name": "10000mAh Magnetic Power Bank", "base_price": 45.00, "sizes": "", "colours": "sage_green", "tags": "tech|practical|travel|essential", "reasons": ["overstock"]},
-    {"provider": "Paper Moon", "category": "lifestyle", "subcategory": "stationery", "name": "Undated Linen Goal Planner", "base_price": 26.00, "sizes": "", "colours": "forest_green", "tags": "productivity|mindfulness|gift|stationery", "reasons": ["season_end"]},
+    # Home goods
+    {"provider": "Nomad Home", "category": "home goods", "subcategory": "decor", "name": "Hand-Poured Soy Wax Candle", "price": 32.00, "stock": 9, "colours": "amber|cream", "tags": "cozy|calm|home|decorative|natural|slow", "reason": "packaging_update"},
+    {"provider": "Nomad Home", "category": "home goods", "subcategory": "kitchen", "name": "Ceramic Matte Mug Set", "price": 38.00, "stock": 5, "colours": "terracotta|sand", "tags": "minimal|cozy|home|practical|classic", "reason": "minor_packaging_damage"},
+    {"provider": "Little Orbit Home", "category": "home goods", "subcategory": "decor", "name": "Terrazzo Catch-All Tray", "price": 44.00, "stock": 3, "colours": "speckled|cream", "tags": "bold|decorative|home|practical|minimal", "reason": "display_refresh"},
+    {"provider": "Little Orbit Home", "category": "home goods", "subcategory": "kitchen", "name": "Reclaimed Glass Tumbler", "price": 28.00, "stock": 12, "colours": "clear|smoke", "tags": "minimal|portable|home|shareable|practical", "reason": "surplus_stock"},
 
-    # Killer Test Row (Unwanted/Niche item)
-    {"provider": "Northstar Apparel", "category": "fashion", "subcategory": "costume", "name": "Neon Yellow Fishnet Vest", "base_price": 49.90, "sizes": "XXS", "colours": "neon_yellow", "tags": "niche|rave|extreme_fashion", "reasons": ["deadstock"]}
+    # Electronics and accessories
+    {"provider": "PocketWorks", "category": "electronics", "subcategory": "audio", "name": "Compact Wireless Earbuds", "price": 59.90, "stock": 6, "colours": "matte_black|white", "tags": "tech|portable|energetic|dark|audio", "reason": "discontinued_colour"},
+    {"provider": "PocketWorks", "category": "electronics", "subcategory": "chargers", "name": "10000mAh Magnetic Power Bank", "price": 45.00, "stock": 7, "colours": "sage_green|black", "tags": "tech|portable|practical|adventurous", "reason": "overstock"},
+    {"provider": "PocketWorks", "category": "electronics", "subcategory": "accessories", "name": "Braided USB-C Cable Set", "price": 19.00, "stock": 15, "colours": "black|colourful", "tags": "tech|practical|portable|clean|shareable", "reason": "overproduction"},
+    {"provider": "Signal Room", "category": "electronics", "subcategory": "audio", "name": "Single-Ear Studio Monitor", "price": 89.00, "stock": 1, "colours": "black", "tags": "tech|audio|dark|edgy|niche", "reason": "discontinued_model"},
+
+    # Stationery
+    {"provider": "Paper Moon", "category": "stationery", "subcategory": "planners", "name": "Undated Linen Goal Planner", "price": 26.00, "stock": 13, "colours": "forest_green|cream", "tags": "stationery|calm|practical|minimal|clean", "reason": "season_end"},
+    {"provider": "Paper Moon", "category": "stationery", "subcategory": "notebooks", "name": "Recycled Dot Grid Notebook", "price": 16.00, "stock": 20, "colours": "colourful|natural", "tags": "stationery|playful|practical|colourful|shareable", "reason": "surplus_stock"},
+    {"provider": "Loop & Light", "category": "stationery", "subcategory": "desk accessories", "name": "Colour Block Desk Mat", "price": 52.00, "stock": 4, "colours": "blue|coral|cream", "tags": "stationery|bold|colourful|practical|decorative", "reason": "display_refresh"},
+    {"provider": "Paper Moon", "category": "stationery", "subcategory": "accessories", "name": "Brass Bookmark Set", "price": 24.00, "stock": 7, "colours": "brass|black", "tags": "stationery|minimal|classic|decorative|shareable", "reason": "packaging_update"},
 ]
 
-def generate_inventory(target_count=80):
-    rows = []
+
+def generate_inventory():
     today = datetime(2026, 9, 23)
+    rows = []
 
-    for i in range(1, target_count + 1):
-        template = random.choice(PRODUCT_TEMPLATES)
-        
-        sku_prefix = template["provider"][:2].upper()
-        sku = f"{sku_prefix}-{i:03d}"
-        
-        # Realistically modest discounts (15% - 40%)
-        discount_rate = random.uniform(0.35, 0.50) if template["category"] == "food" else random.uniform(0.15, 0.38)
-        retail = template["base_price"]
-        surplus = round(retail * (1 - discount_rate), 2)
-
-        expiry = (today + timedelta(days=random.randint(2, 14))).strftime("%Y-%m-%d") if template["category"] == "food" else ""
-
-        row = {
-            "sku": sku,
-            "provider": template["provider"],
-            "category": template["category"],
-            "subcategory": template["subcategory"],
-            "product_name": template["name"],
-            "retail_price": f"{retail:.2f}",
-            "surplus_price": f"{surplus:.2f}",
-            "stock_qty": random.randint(3, 20),
-            "surplus_reason": random.choice(template["reasons"]),
-            "days_in_surplus": random.randint(10, 85),
-            "expiry_date": expiry,
-            "sizes": template.get("sizes", ""),
-            "colours": template.get("colours", ""),
-            "tags": template["tags"],
-            "dietary": template.get("dietary", ""),
-            "allergens": template.get("allergens", ""),
+    for index, product in enumerate(PRODUCTS, start=1):
+        category = product["category"]
+        rows.append({
+            "sku": f"RO-{index:03d}",
+            "provider": product["provider"],
+            "category": category,
+            "subcategory": product["subcategory"],
+            "product_name": product["name"],
+            "retail_price": round(product["price"], 2),
+            "surplus_price": round(product["price"] * (0.55 if category == "food" else 0.68), 2),
+            "stock_qty": product["stock"],
+            "surplus_reason": product["reason"],
+            "days_in_surplus": 10 + (index * 7) % 76,
+            "expiry_date": (today + timedelta(days=2 + index % 13)).strftime("%Y-%m-%d") if category == "food" else "",
+            "sizes": product.get("sizes", ""),
+            "colours": product.get("colours", ""),
+            "tags": product["tags"],
+            "dietary": product.get("dietary", ""),
+            "allergens": product.get("allergens", ""),
             "condition": "new",
-            "active": True if template["name"] != "Neon Yellow Fishnet Vest" else False
-        }
-        rows.append(row)
+            "active": product.get("active", True),
+        })
 
-    df = pd.DataFrame(rows)
     output_path = "data/inventory.xlsx"
-    
+    dataframe = pd.DataFrame(rows)
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Inventory", index=False)
-        
-    print(f" Success! Created {len(df)} SKUs in '{output_path}' with sheet 'Inventory'.")
+        dataframe.to_excel(writer, sheet_name="Inventory", index=False)
+
+    print(f"Created {len(rows)} distinct products in '{output_path}'.")
+
 
 if __name__ == "__main__":
-    generate_inventory(80)
+    generate_inventory()

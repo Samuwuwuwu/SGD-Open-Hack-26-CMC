@@ -8,6 +8,8 @@ This repository is intentionally small and demo-first. The current golden path i
 
 - `apps/web/` — React + Vite customer prototype.
 - `services/api/` — Express API, demo inventory, and matching seams.
+- `data/inventory.xlsx` — committed demo inventory source read by the API.
+- `data/generate_inventory.py` — optional dataset utility; normal setup does not need Python.
 - `setup-dev.bat`, `validate-local.bat` — local lifecycle commands.
 
 ## First-time setup
@@ -40,4 +42,4 @@ Individual service commands are also available:
 validate-local.bat
 ```
 
-This runs frontend lint/build checks and API tests. No database, Docker, Python, authentication, or external AI provider is required.
+This runs frontend lint/build checks and API tests. No database, Docker, Python, authentication, or external AI provider is required for the normal path.

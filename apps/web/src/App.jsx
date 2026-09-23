@@ -99,11 +99,11 @@ function App() {
               <section className="journey-panel reveal-panel">
                 <div className="panel-kicker">05 / Reveal</div>
                 <span className="reveal-stamp">A considered surprise</span>
-                <h3>{selectedDrop.name}</h3>
-                <p className="panel-copy">From {selectedDrop.partner} · {selectedDrop.category}</p>
+                <h3>{selectedDrop.product_name}</h3>
+                <p className="panel-copy">From {selectedDrop.provider} · {selectedDrop.category}</p>
                 <div className="reveal-product">
                   <div className="product-art" aria-hidden="true">{selectedDrop.category === 'fashion' ? '✦' : selectedDrop.category === 'food' ? '◌' : '◒'}</div>
-                  <div><p className="product-price">${selectedDrop.availablePrice}</p><p>{selectedDrop.description}</p></div>
+                  <div><p className="product-price">${selectedDrop.surplus_price}</p><p>{selectedDrop.description}</p></div>
                 </div>
                 <div className="reveal-actions"><button className="primary-button" type="button" onClick={() => setStage(4)}>Choose another <span>↗</span></button><button className="text-button" type="button" onClick={() => setStage(0)}>Start over</button></div>
               </section>

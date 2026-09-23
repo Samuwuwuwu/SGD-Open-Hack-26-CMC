@@ -1,5 +1,5 @@
-import { demoInventory } from '../data/demoInventory.js';
+import { inventory } from '../data/inventory.js';
 
 export function getDemoInventory() {
-  return demoInventory;
+  return inventory;
 }
