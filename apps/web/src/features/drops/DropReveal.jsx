@@ -1,5 +1,6 @@
 import ProductArt from '../../components/ProductArt.jsx';
 import DropPrice from '../../components/DropPrice.jsx';
+import IconGlyph from '../../components/IconGlyph.jsx';
 
 const impactPriceFormatter = new Intl.NumberFormat('en-SG', {
   minimumSignificantDigits: 2,
@@ -23,9 +24,9 @@ function DropReveal({ drop, budget, preferences, preferenceOptions, claimed }) {
         </div>
       </div>
       <div className="match-reasons">
-        <h3><span aria-hidden="true">&#10022;</span> Why this drop</h3>
+        <h3><IconGlyph name="sparkles" size={18} /> Why this drop</h3>
         <p>{budget === drop.availablePrice ? `Right on your $${budget} budget.` : `$${budget - drop.availablePrice} under your $${budget} budget \u2014 a little room to spare.`}</p>
-        {matchingPreferences.length > 0 ? <div className="match-tags">{matchingPreferences.map((option) => <span key={option.value}>{option.icon} {option.label}</span>)}</div> : <p>A discovery within your range, with no shared vibe tags.</p>}
+        {matchingPreferences.length > 0 ? <div className="match-tags">{matchingPreferences.map((option) => <span key={option.value}><IconGlyph name={option.icon} size={15} /> {option.label}</span>)}</div> : <p>A discovery within your range, with no shared vibe tags.</p>}
         {drop.constraints?.size?.length > 0 && <p>Available sizes: {drop.constraints.size.join(', ')}</p>}
         {drop.constraints?.dietary?.length > 0 && <p>Dietary information: {drop.constraints.dietary.join(', ')}</p>}
         {drop.constraints?.allergens?.length > 0 && <p>Contains: {drop.constraints.allergens.join(', ')}</p>}

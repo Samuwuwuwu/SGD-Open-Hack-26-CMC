@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import ButtonLift from './components/ButtonLift.jsx';
 import ProgressRail from './components/ProgressRail.jsx';
+import IconGlyph from './components/IconGlyph.jsx';
 import { preferenceOptions } from './data/preferenceOptions.js';
 import StartPanel from './features/onboarding/StartPanel.jsx';
 import PreferencePanel from './features/preferences/PreferencePanel.jsx';
@@ -110,7 +112,11 @@ function App() {
       <section className={`prototype-frame expanded-window shell--${stage === 0 ? 'landing' : 'experience'}`} aria-label="ROLLOVER Gacha Arcade">
         <header className="window-titlebar">
           <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
-          <span className="window-controls" aria-hidden="true">&mdash; &#9633; &times;</span>
+          <span className="window-controls" aria-hidden="true">
+            <IconGlyph name="minus" size={16} />
+            <IconGlyph name="square" size={15} />
+            <IconGlyph name="close" size={17} />
+          </span>
         </header>
         <div className="window-interior">
           <ProgressRail stages={stages} currentStage={stage} onNavigate={setStage} isMatching={isMatching} />
@@ -145,7 +151,7 @@ function App() {
               )}
               {stage === 3 && (
                 <section className="matching-panel" role="status" aria-live="polite" aria-busy={isMatching}>
-                  <div className="radar-screen" aria-hidden="true"><div className="radar-ring"><span className="radar-sweep" /><span className="radar-pip" /><span className="radar-center">&#10022;</span></div></div>
+                  <div className="radar-screen" aria-hidden="true"><div className="radar-ring"><span className="radar-sweep" /><span className="radar-pip" /><span className="radar-center"><IconGlyph name="sparkles" size={24} /></span></div></div>
                   <h2>Rolling your drop&hellip;</h2>
                   <p className="panel-copy">Your answers are narrowing the live surplus pool.</p>
                 </section>
@@ -155,31 +161,31 @@ function App() {
 
               {stage === 1 && (
                 <div className="viewport-actions" aria-label="Range actions">
-                  <button className="secondary-button" type="button" onClick={() => setStage(0)}>Back <span aria-hidden="true">&larr;</span></button>
-                  <button className="primary-button" type="button" onClick={() => setStage(2)}>Pick my quiz <span aria-hidden="true">&rarr;</span></button>
+                  <ButtonLift><button className="secondary-button" type="button" onClick={() => setStage(0)}>Back <IconGlyph name="arrowLeft" size={17} /></button></ButtonLift>
+                  <ButtonLift><button className="primary-button" type="button" onClick={() => setStage(2)}>Pick my quiz <IconGlyph name="arrowRight" size={18} /></button></ButtonLift>
                 </div>
               )}
               {stage === 2 && (
                 <div className="viewport-actions" aria-label="Quiz actions">
                   {!quizTopic ? (
-                    <button className="secondary-button" type="button" onClick={() => setStage(1)}>Edit range <span aria-hidden="true">&larr;</span></button>
+                    <ButtonLift><button className="secondary-button" type="button" onClick={() => setStage(1)}>Edit range <IconGlyph name="arrowLeft" size={17} /></button></ButtonLift>
                   ) : (
-                    <button className="secondary-button" type="button" onClick={resetQuiz}>Pick a different quiz <span aria-hidden="true">&larr;</span></button>
+                    <ButtonLift><button className="secondary-button" type="button" onClick={resetQuiz}>Pick a different quiz <IconGlyph name="arrowLeft" size={17} /></button></ButtonLift>
                   )}
                 </div>
               )}
               {stage === 4 && (
                 <div className="viewport-actions" aria-label="Drop actions">
-                  <button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(2); }}>Roll again <span aria-hidden="true">&#8634;</span></button>
+                  <ButtonLift><button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(2); }}>Roll again <IconGlyph name="refresh" size={17} /></button></ButtonLift>
                 </div>
               )}
               {stage === 5 && selectedDrop && (
                 <div className="viewport-actions" aria-label="Reveal actions">
-                  <button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(0); }}>Start over <span aria-hidden="true">&#8634;</span></button>
-                  <button className="secondary-button" type="button" onClick={() => setStage(4)}>Choose another <span aria-hidden="true">&rarr;</span></button>
-                  <button className="primary-button" type="button" onClick={() => setClaimedDropId(selectedDrop.id)} disabled={claimedDropId === selectedDrop.id}>
-                    {claimedDropId === selectedDrop.id ? <>Demo pick saved <span aria-hidden="true">&#10003;</span></> : <>Claim demo drop <span aria-hidden="true">&#8599;</span></>}
-                  </button>
+                  <ButtonLift><button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(0); }}>Start over <IconGlyph name="refresh" size={17} /></button></ButtonLift>
+                  <ButtonLift><button className="secondary-button" type="button" onClick={() => setStage(4)}>Choose another <IconGlyph name="arrowRight" size={17} /></button></ButtonLift>
+                  <ButtonLift><button className="primary-button" type="button" onClick={() => setClaimedDropId(selectedDrop.id)} disabled={claimedDropId === selectedDrop.id}>
+                    {claimedDropId === selectedDrop.id ? <>Demo pick saved <IconGlyph name="check" size={18} /></> : <>Claim demo drop <IconGlyph name="arrowUpRight" size={18} /></>}
+                  </button></ButtonLift>
                 </div>
               )}
             </div>

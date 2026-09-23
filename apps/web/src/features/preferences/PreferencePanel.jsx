@@ -1,3 +1,6 @@
+import IconGlyph from '../../components/IconGlyph.jsx';
+import ButtonLift from '../../components/ButtonLift.jsx';
+
 const topics = ['Music', 'Games', 'Movies & TV', 'My Little Pony', 'Random'];
 
 function PreferencePanel({
@@ -20,9 +23,9 @@ function PreferencePanel({
 
         <div className="topic-grid">
           {topics.map((item) => (
-            <button className="choice-chip topic-chip" type="button" key={item} onClick={() => onChooseTopic(item)}>
-              <span>{item}</span><span className="choice-check" aria-hidden="true">→</span>
-            </button>
+            <ButtonLift key={item}><button className="choice-chip topic-chip" type="button" onClick={() => onChooseTopic(item)}>
+              <span>{item}</span><span className="choice-check"><IconGlyph name="arrowRight" size={17} /></span>
+            </button></ButtonLift>
           ))}
         </div>
 
@@ -49,14 +52,14 @@ function PreferencePanel({
   return (
     <section className="journey-panel preference-panel quiz-panel">
       <div className="quiz-meta">
-        <button className="quiz-topic-button" type="button" onClick={onResetTopic}>{topic} ↺</button>
+        <ButtonLift><button className="quiz-topic-button" type="button" onClick={onResetTopic}>{topic} <IconGlyph name="rotate" size={16} /></button></ButtonLift>
         {remainingCount > 0 && <span>{remainingCount} possible finds</span>}
       </div>
 
       {isLoading ? (
         <div className="quiz-loading" role="status">
-          <span className="quiz-spinner" aria-hidden="true">↺</span>
-          <h2>Cooking up a question…</h2>
+          <span className="quiz-spinner"><IconGlyph name="loader" size={54} /></span>
+          <h2>Cooking up a question&hellip;</h2>
         </div>
       ) : question ? (
         <>
@@ -64,10 +67,10 @@ function PreferencePanel({
           <h2 className="quiz-question">{question.question}</h2>
           <div className="quiz-answer-grid">
             {question.options.map((option, index) => (
-              <button className="quiz-answer" type="button" key={`${option.label}-${index}`} onClick={() => onAnswer(option)}>
+              <ButtonLift key={`${option.label}-${index}`}><button className="quiz-answer" type="button" onClick={() => onAnswer(option)}>
                 <span className="answer-letter">{String.fromCharCode(65 + index)}</span>
                 <span>{option.label}</span>
-              </button>
+              </button></ButtonLift>
             ))}
           </div>
         </>

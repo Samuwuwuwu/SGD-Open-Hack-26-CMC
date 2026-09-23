@@ -1,7 +1,9 @@
+import IconGlyph from './IconGlyph.jsx';
+
 function ProductArt({ category }) {
   return (
     <div className={`product-illustration illustration-${category}`} aria-hidden="true">
-      <span className="illustration-sparkle">✦</span>
+      <span className="illustration-sparkle"><IconGlyph name="sparkles" size={20} /></span>
       <svg viewBox="0 0 160 140" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round">
         {category === 'fashion' ? (
           <>
@@ -24,7 +26,7 @@ function ProductArt({ category }) {
           </>
         )}
       </svg>
-      <span className="illustration-orbit">◌</span>
+      <span className="illustration-orbit"><IconGlyph name="circleDot" size={24} /></span>
     </div>
   );
 }

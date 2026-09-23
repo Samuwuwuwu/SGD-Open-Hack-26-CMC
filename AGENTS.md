@@ -25,6 +25,12 @@ Optimize for the shortest correct path to a reliable demo. Keep the concept easy
 
 Inventory facts such as stock, price, size, dietary information, and availability are deterministic and server-owned. Future AI may help phrase questions or interpret explicit answers, but must not fabricate hard product facts. Keep secrets server-side.
 
+## Interaction physics
+
+- Tactile lift buttons must use a stationary `.button-hitbox` wrapper. Apply hover/active transforms to the child button face, never to the pointer target itself.
+- Keep one shared interaction rule for primary buttons, secondary buttons, topic chips, quiz answers, rail steps, and other controls using the lift mechanic. Do not add competing component-specific transform rules.
+- Gate decorative hover movement behind `@media (hover: hover) and (pointer: fine)`. Touch devices should rely on active feedback, and `prefers-reduced-motion` must disable transform motion.
+
 ## Handoff
 
 Before handoff, run the repository validation command and any relevant live smoke checks. Final notes should include a concise summary, changed files, exact checks run, known limitations, and exactly one proposed Conventional Commit message:

@@ -1,8 +1,11 @@
+import IconGlyph from './IconGlyph.jsx';
+import ButtonLift from './ButtonLift.jsx';
+
 function ProgressRail({ stages, currentStage, onNavigate, isMatching }) {
   return (
     <aside className="journey-sidebar">
       <a className="brand-lockup" href="#main-viewport" aria-label="ROLLOVER, jump to content">
-        <span className="brand-symbol" aria-hidden="true">↺</span>
+        <span className="brand-symbol" aria-hidden="true"><IconGlyph name="rotate" size={36} /></span>
         <div><h1>ROLLOVER</h1><span className="rail-label">The surplus arcade</span></div>
       </a>
       <nav className="progress-rail" aria-label="Drop journey">
@@ -12,17 +15,21 @@ function ProgressRail({ stages, currentStage, onNavigate, isMatching }) {
             const complete = step < currentStage;
             return (
               <li key={label}>
-                <button
-                  className={`rail-step ${step === currentStage ? 'active' : ''} ${complete ? 'complete' : ''}`}
-                  type="button"
-                  aria-current={step === currentStage ? 'step' : undefined}
-                  disabled={isMatching || step === 3 || step >= currentStage}
-                  onClick={() => onNavigate(step)}
-                >
-                  <span className="rail-number">{String(step).padStart(2, '0')}</span>
-                  <span>{label}</span>
-                  <span className="rail-indicator" aria-hidden="true">{complete ? '✓' : step === currentStage ? '▶' : '·'}</span>
-                </button>
+                <ButtonLift block>
+                  <button
+                    className={`rail-step ${step === currentStage ? 'active' : ''} ${complete ? 'complete' : ''}`}
+                    type="button"
+                    aria-current={step === currentStage ? 'step' : undefined}
+                    disabled={isMatching || step === 3 || step >= currentStage}
+                    onClick={() => onNavigate(step)}
+                  >
+                    <span className="rail-number">{String(step).padStart(2, '0')}</span>
+                    <span>{label}</span>
+                    <span className="rail-indicator" aria-hidden="true">
+                      <IconGlyph name={complete ? 'check' : step === currentStage ? 'playerPlay' : 'point'} size={complete || step === currentStage ? 16 : 14} />
+                    </span>
+                  </button>
+                </ButtonLift>
               </li>
             );
           })}

@@ -74,7 +74,7 @@
 .window-dots span { width: 12px; height: 12px; border: 2px solid var(--ink); border-radius: 50%; background: var(--surface); }
 .window-dots span:first-child { background: var(--orange); }
 .window-dots span:last-child { background: var(--lime); }
-.window-controls { font-family: var(--font-mono); font-size: 20px; white-space: nowrap; }
+.window-controls { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 20px; white-space: nowrap; }
 
 .window-interior {
   display: grid;

@@ -1,3 +1,5 @@
+import IconGlyph from '../../components/IconGlyph.jsx';
+import ButtonLift from '../../components/ButtonLift.jsx';
 import ProductArt from '../../components/ProductArt.jsx';
 import DropPrice from '../../components/DropPrice.jsx';
 
@@ -6,7 +8,7 @@ function DropCandidates({ candidates, onReveal }) {
     <section className="drops-section">
       <div className="drops-heading">
         <h2>Good finds.<br /><span className="highlight-word">Your call.</span></h2>
-        <span className="candidate-count">{candidates.length} {candidates.length === 1 ? 'drop' : 'drops'}<span aria-hidden="true"> ✦</span></span>
+        <span className="candidate-count">{candidates.length} {candidates.length === 1 ? 'drop' : 'drops'}<IconGlyph name="sparkles" size={13} /></span>
       </div>
       <p className="panel-copy">Pick a drop to see the details and why it fits.</p>
       {candidates.length > 0 ? (
@@ -22,13 +24,13 @@ function DropCandidates({ candidates, onReveal }) {
                 <h3>{candidate.name}</h3>
                 <p className="drop-description">{candidate.description}</p>
                 <DropPrice drop={candidate} showDiscount />
-                <button className="primary-button reveal-button" type="button" onClick={() => onReveal(candidate)} aria-label={`Reveal ${candidate.name}`}>Reveal <span aria-hidden="true">↗</span></button>
+                <ButtonLift><button className="primary-button reveal-button" type="button" onClick={() => onReveal(candidate)} aria-label={`Reveal ${candidate.name}`}>Reveal <IconGlyph name="arrowUpRight" size={18} /></button></ButtonLift>
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <div className="empty-state"><span className="empty-glyph" aria-hidden="true">⌕</span><h3>No signal. Yet.</h3><p>No demo items fit this combination. Try a higher budget or adjust your details.</p></div>
+        <div className="empty-state"><span className="empty-glyph"><IconGlyph name="search" size={48} /></span><h3>No signal. Yet.</h3><p>No demo items fit this combination. Try a higher budget or adjust your details.</p></div>
       )}
     </section>
   );
