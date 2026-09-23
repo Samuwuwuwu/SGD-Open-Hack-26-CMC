@@ -107,59 +107,85 @@ function App() {
 
   return (
     <main className="app-shell">
-      <section className={`prototype-frame expanded-window ${stage === 0 ? 'home-screen' : ''}`} aria-label="ROLLOVER Gacha Arcade">
+      <section className={`prototype-frame expanded-window shell--${stage === 0 ? 'landing' : 'experience'}`} aria-label="ROLLOVER Gacha Arcade">
         <header className="window-titlebar">
           <div className="window-dots" aria-hidden="true"><span /><span /><span /></div>
-          {stage !== 0 && <nav className="titlebar-actions" aria-label="Stage controls">
-            {stage === 1 && <button className="secondary-button" type="button" onClick={() => setStage(0)}>Back &larr;</button>}
-            {stage === 1 && <button className="primary-button" type="button" onClick={() => setStage(2)}>Pick my quiz <span aria-hidden="true">→</span></button>}
-            {stage === 2 && <button className="secondary-button" type="button" onClick={() => setStage(1)}>Edit range &larr;</button>}
-            {stage === 3 && <span className="titlebar-status" role="status">Finding your drops…</span>}
-            {stage === 4 && <button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(2); }}>Roll again &#8634;</button>}
-            {stage === 5 && <button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(0); }}>Start over &#8634;</button>}
-          </nav>}
-          <span className="window-controls" aria-hidden="true">— □ ×</span>
+          <span className="window-controls" aria-hidden="true">&mdash; &#9633; &times;</span>
         </header>
         <div className="window-interior">
           <ProgressRail stages={stages} currentStage={stage} onNavigate={setStage} isMatching={isMatching} />
           <div className="viewport-stack">
             <div className="main-viewport" id="main-viewport" ref={viewportRef} tabIndex={-1} aria-label={`${stages[stage]} stage`}>
-              {error && <div className="error-banner" role="alert">{error}</div>}
-              {stage === 0 && <StartPanel onStart={() => setStage(1)} />}
-              {stage === 1 && (
-                <section className="journey-panel budget-panel">
-                  <h2>Big finds.<br /><span className="highlight-word">Your budget.</span></h2>
-                  <p className="panel-copy">Set your limit. Every drop will stay within it.</p>
-                  <div className="budget-console">
-                    <label className="rail-label" htmlFor="drop-budget">Your spending limit</label>
-                    <output className="budget-readout" htmlFor="drop-budget">${budget}</output>
-                    <input id="drop-budget" aria-label="Drop budget" className="budget-slider" type="range" min="10" max="150" step="5" value={budget} onChange={(event) => setBudget(Number(event.target.value))} />
-                    <div className="range-labels"><span>$10</span><span>$150</span></div>
+              <div className="stage-layout">
+                <div className="stage-content">
+                  {error && <div className="error-banner" role="alert">{error}</div>}
+                  {stage === 0 && <StartPanel onStart={() => setStage(1)} />}
+                  {stage === 1 && (
+                    <section className="journey-panel budget-panel">
+                      <h2>Big finds.<br /><span className="highlight-word">Your budget.</span></h2>
+                      <p className="panel-copy">Set your limit. Every drop will stay within it.</p>
+                      <div className="budget-console">
+                        <label className="rail-label" htmlFor="drop-budget">Your spending limit</label>
+                        <output className="budget-readout" htmlFor="drop-budget">${budget}</output>
+                        <input id="drop-budget" aria-label="Drop budget" className="budget-slider" type="range" min="10" max="150" step="5" value={budget} onChange={(event) => setBudget(Number(event.target.value))} />
+                        <div className="range-labels"><span>$10</span><span>$150</span></div>
+                      </div>
+                    </section>
+                  )}
+                  {stage === 2 && (
+                    <PreferencePanel
+                      topic={quizTopic}
+                      question={quizQuestion}
+                      remainingCount={quizRemaining}
+                      isLoading={quizLoading}
+                      constraints={constraints}
+                      onConstraintsChange={setConstraints}
+                      onChooseTopic={chooseTopic}
+                      onAnswer={answerQuestion}
+                      onResetTopic={resetQuiz}
+                    />
+                  )}
+                  {stage === 3 && (
+                    <section className="matching-panel" role="status" aria-live="polite" aria-busy={isMatching}>
+                      <div className="radar-screen" aria-hidden="true"><div className="radar-ring"><span className="radar-sweep" /><span className="radar-pip" /><span className="radar-center">&#10022;</span></div></div>
+                      <h2>Rolling your drop&hellip;</h2>
+                      <p className="panel-copy">Your answers are narrowing the live surplus pool.</p>
+                    </section>
+                  )}
+                  {stage === 4 && <DropCandidates candidates={candidates} onReveal={(drop) => { setSelectedDrop(drop); setStage(5); }} />}
+                  {stage === 5 && selectedDrop && <DropReveal drop={selectedDrop} budget={budget} preferences={preferences} preferenceOptions={preferenceOptions} claimed={claimedDropId === selectedDrop.id} />}
+                </div>
+
+                {stage === 1 && (
+                  <div className="stage-actions" aria-label="Range actions">
+                    <button className="secondary-button" type="button" onClick={() => setStage(0)}>Back <span aria-hidden="true">&larr;</span></button>
+                    <button className="primary-button" type="button" onClick={() => setStage(2)}>Pick my quiz <span aria-hidden="true">&rarr;</span></button>
                   </div>
-                </section>
-              )}
-              {stage === 2 && (
-                <PreferencePanel
-                  topic={quizTopic}
-                  question={quizQuestion}
-                  remainingCount={quizRemaining}
-                  isLoading={quizLoading}
-                  constraints={constraints}
-                  onConstraintsChange={setConstraints}
-                  onChooseTopic={chooseTopic}
-                  onAnswer={answerQuestion}
-                  onResetTopic={resetQuiz}
-                />
-              )}
-              {stage === 3 && (
-                <section className="matching-panel" role="status" aria-live="polite" aria-busy={isMatching}>
-                  <div className="radar-screen" aria-hidden="true"><div className="radar-ring"><span className="radar-sweep" /><span className="radar-pip" /><span className="radar-center">✦</span></div></div>
-                  <h2>Rolling your drop…</h2>
-                  <p className="panel-copy">Your answers are narrowing the live surplus pool.</p>
-                </section>
-              )}
-              {stage === 4 && <DropCandidates candidates={candidates} onReveal={(drop) => { setSelectedDrop(drop); setStage(5); }} />}
-              {stage === 5 && selectedDrop && <DropReveal drop={selectedDrop} budget={budget} preferences={preferences} preferenceOptions={preferenceOptions} claimed={claimedDropId === selectedDrop.id} onClaim={() => setClaimedDropId(selectedDrop.id)} onSwap={() => setStage(4)} />}
+                )}
+                {stage === 2 && (
+                  <div className="stage-actions" aria-label="Quiz actions">
+                    {!quizTopic ? (
+                      <button className="secondary-button" type="button" onClick={() => setStage(1)}>Edit range <span aria-hidden="true">&larr;</span></button>
+                    ) : (
+                      <button className="secondary-button" type="button" onClick={resetQuiz}>Pick a different quiz <span aria-hidden="true">&larr;</span></button>
+                    )}
+                  </div>
+                )}
+                {stage === 4 && (
+                  <div className="stage-actions" aria-label="Drop actions">
+                    <button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(2); }}>Roll again <span aria-hidden="true">&#8634;</span></button>
+                  </div>
+                )}
+                {stage === 5 && selectedDrop && (
+                  <div className="stage-actions" aria-label="Reveal actions">
+                    <button className="secondary-button" type="button" onClick={() => { resetQuiz(); setStage(0); }}>Start over <span aria-hidden="true">&#8634;</span></button>
+                    <button className="secondary-button" type="button" onClick={() => setStage(4)}>Choose another <span aria-hidden="true">&rarr;</span></button>
+                    <button className="primary-button" type="button" onClick={() => setClaimedDropId(selectedDrop.id)} disabled={claimedDropId === selectedDrop.id}>
+                      {claimedDropId === selectedDrop.id ? <>Demo pick saved <span aria-hidden="true">&#10003;</span></> : <>Claim demo drop <span aria-hidden="true">&#8599;</span></>}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -6,7 +6,7 @@ const impactPriceFormatter = new Intl.NumberFormat('en-SG', {
   maximumSignificantDigits: 2,
 });
 
-function DropReveal({ drop, budget, preferences, preferenceOptions, claimed, onClaim, onSwap }) {
+function DropReveal({ drop, budget, preferences, preferenceOptions, claimed }) {
   const matchingPreferences = preferenceOptions.filter((option) => preferences.includes(option.value) && drop.tags.includes(option.value));
   const belowRetail = impactPriceFormatter.format(Math.max(0, drop.retailPrice - drop.availablePrice));
 
@@ -23,8 +23,8 @@ function DropReveal({ drop, budget, preferences, preferenceOptions, claimed, onC
         </div>
       </div>
       <div className="match-reasons">
-        <h3><span aria-hidden="true">✦</span> Why this drop</h3>
-        <p>{budget === drop.availablePrice ? `Right on your $${budget} budget.` : `$${budget - drop.availablePrice} under your $${budget} budget — a little room to spare.`}</p>
+        <h3><span aria-hidden="true">&#10022;</span> Why this drop</h3>
+        <p>{budget === drop.availablePrice ? `Right on your $${budget} budget.` : `$${budget - drop.availablePrice} under your $${budget} budget \u2014 a little room to spare.`}</p>
         {matchingPreferences.length > 0 ? <div className="match-tags">{matchingPreferences.map((option) => <span key={option.value}>{option.icon} {option.label}</span>)}</div> : <p>A discovery within your range, with no shared vibe tags.</p>}
         {drop.constraints?.size?.length > 0 && <p>Available sizes: {drop.constraints.size.join(', ')}</p>}
         {drop.constraints?.dietary?.length > 0 && <p>Dietary information: {drop.constraints.dietary.join(', ')}</p>}
@@ -34,11 +34,7 @@ function DropReveal({ drop, budget, preferences, preferenceOptions, claimed, onC
         <div><strong>${belowRetail}</strong><span>Below retail</span></div>
         <div><strong>{drop.stock}</strong><span>In demo stock</span></div>
       </div>
-      <div className="reveal-actions">
-        <button className="primary-button" type="button" onClick={onClaim} disabled={claimed}>{claimed ? 'Demo pick saved ✓' : 'Claim demo drop ↗'}</button>
-        <button className="secondary-button" type="button" onClick={onSwap}>Choose another ↺</button>
-      </div>
-      <p className="microcopy" role="status">{claimed ? 'Saved for this session. No order placed or stock reserved.' : 'Try the claim. This demo doesn’t place orders or reserve stock.'}</p>
+      <p className="microcopy" role="status">{claimed ? 'Saved for this session. No order placed or stock reserved.' : 'Try the claim. This demo doesn\'t place orders or reserve stock.'}</p>
     </section>
   );
 }

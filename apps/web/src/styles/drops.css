@@ -43,7 +43,6 @@
 .impact-metrics > div:nth-child(2) strong { background: var(--cyan); }
 .impact-metrics > div:nth-child(3) strong { background: var(--magenta); }
 .impact-metrics span { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
-.reveal-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
 @media (max-width: 767px) {
   .drops-heading h2 { font-size: 36px; }
   .candidate-count { padding: 5px 8px; font-size: 9px; }
@@ -54,7 +53,6 @@
   .reveal-spotlight { grid-template-columns: 1fr; }
   .reveal-panel > h2 { font-size: 32px; }
   .reveal-art { max-width: 320px; width: 100%; margin: auto; }
-  .reveal-actions > button { flex: 1; }
   .impact-metrics { gap: 8px; }
   .impact-metrics span { font-size: 8px; }
 }
@@ -90,7 +88,5 @@
   .match-tags { gap: 5px; margin: 6px 0; }
   .impact-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-self: center; gap: 10px; margin: 0; }
   .impact-metrics strong { width: 64px; height: 64px; font-size: 18px; white-space: nowrap; }
-  .reveal-actions { grid-column: 1 / -1; justify-content: center; gap: 12px; margin-top: 0; }
-  .reveal-actions > button { min-height: 40px; padding-block: 8px; }
   .reveal-panel > .microcopy { grid-column: 1 / -1; margin-top: 0; text-align: center; }
 }
