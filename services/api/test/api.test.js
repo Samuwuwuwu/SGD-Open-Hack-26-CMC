@@ -65,10 +65,15 @@ test('quiz requests strict structured output and keeps inventory tag validation'
   const previousFetch = globalThis.fetch;
   const previousApiKey = process.env.CEREBRAS_API_KEY;
   const previousBaseUrl = process.env.CEREBRAS_BASE_URL;
+  const previousModel = process.env.CEREBRAS_MODEL;
+  const previousInfo = console.info;
   let requestBody;
+  let infoLine;
 
   process.env.CEREBRAS_API_KEY = 'test-key';
   process.env.CEREBRAS_BASE_URL = 'https://cerebras.test/v1';
+  process.env.CEREBRAS_MODEL = 'gpt-oss-120b';
+  console.info = (message) => { infoLine = message; };
   globalThis.fetch = async (_url, options) => {
     requestBody = JSON.parse(options.body);
     return new globalThis.Response(JSON.stringify({
@@ -102,16 +107,20 @@ test('quiz requests strict structured output and keeps inventory tag validation'
     assert.equal(requestBody.response_format.type, 'json_schema');
     assert.equal(requestBody.response_format.json_schema.name, 'quiz_question');
     assert.equal(requestBody.response_format.json_schema.strict, true);
+    assert.equal(infoLine, '[quiz] Cerebras 200 · gpt-oss-120b · source=cerebras · finish=stop');
     assert.match(requestBody.messages[1].content, /QUESTIONS ALREADY USED THIS SESSION:/);
     assert.match(requestBody.messages[1].content, /A previous scenario happens\./);
     assert.match(requestBody.messages[1].content, /Prefer a question style not used in the previous two questions\./);
     assert.deepEqual(result.options.map((option) => option.tags), [['shareable'], ['shareable'], ['shareable'], ['shareable']]);
   } finally {
     globalThis.fetch = previousFetch;
+    console.info = previousInfo;
     if (previousApiKey === undefined) delete process.env.CEREBRAS_API_KEY;
     else process.env.CEREBRAS_API_KEY = previousApiKey;
     if (previousBaseUrl === undefined) delete process.env.CEREBRAS_BASE_URL;
     else process.env.CEREBRAS_BASE_URL = previousBaseUrl;
+    if (previousModel === undefined) delete process.env.CEREBRAS_MODEL;
+    else process.env.CEREBRAS_MODEL = previousModel;
   }
 });
 
@@ -127,6 +136,7 @@ test('quiz falls back when Cerebras returns no content', async () => {
     const result = await nextQuizQuestion({ budget: 60, topic: 'Style', constraints: { size: 'any', dietary: 'any' } });
     assert.equal(result.source, 'fallback');
     assert.equal(result.options.length, 4);
+    assert.equal(result.options[0].label, 'Ask for the backstory');
   } finally {
     globalThis.fetch = previousFetch;
     if (previousApiKey === undefined) delete process.env.CEREBRAS_API_KEY;
@@ -141,7 +151,7 @@ test('quiz requires four questions and caps the journey at five', async () => {
 
   try {
     const afterThree = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['shareable'], ['shareable'], ['shareable']] });
-    const earlyAfterFour = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['food'], ['food'], ['food'], ['food']] });
+    const earlyAfterFour = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['fashion'], ['fashion'], ['fashion'], ['fashion']] });
     const afterFive = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['shareable'], ['shareable'], ['shareable'], ['shareable'], ['shareable']] });
 
     assert.equal(afterThree.done, false);

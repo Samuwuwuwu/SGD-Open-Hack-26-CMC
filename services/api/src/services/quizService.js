@@ -15,12 +15,39 @@ const QUESTION_STYLES = [
   'chaotic event',
   'harmless moral choice',
 ];
-const FALLBACK_QUESTION_BUILDERS = [
-  (theme) => `${theme} takes an unexpected turn. What happens next?`,
-  (theme) => `You arrive somewhere new in ${theme}. Where do you go first?`,
-  (theme) => `A strange ${theme} rule appears. Do you follow it?`,
-  (theme) => `Someone challenges your ${theme} instincts. How do you respond?`,
-  (theme) => `Your ${theme} routine gets interrupted. What is your move?`,
+const FALLBACK_QUESTION_TEMPLATES = [
+  {
+    question: 'A stranger gives you a mysterious compliment. Your response?',
+    answers: ['Ask for the backstory', 'Accept it dramatically', 'Return an even stranger compliment', 'Pretend this happens daily'],
+  },
+  {
+    question: 'You get one free door through time. Where does it open?',
+    answers: ['A future rooftop party', 'Yesterday, but improved', 'A forgotten summer afternoon', 'Somewhere nobody has named yet'],
+  },
+  {
+    question: 'A tiny dragon moves in. What is your first house rule?',
+    answers: ['No fire before breakfast', 'Treasure belongs in labelled drawers', 'Guests must bring snacks', 'Absolutely no dramatic entrances'],
+  },
+  {
+    question: 'The elevator starts playing your secret anthem. What happens next?',
+    answers: ['Turn it up', 'Investigate every floor', 'Dance like nobody asked', 'Leave before the chorus'],
+  },
+  {
+    question: 'You can erase one awkward memory. Do you?',
+    answers: ['Absolutely, immediately', 'Keep it for character development', 'Trade it for someone else’s', 'Rename it a formative experience'],
+  },
+  {
+    question: 'Your morning alarm becomes a person. What do they say?',
+    answers: ['Five more minutes, honestly', 'We need to talk', 'Today has potential', 'You already snoozed twice'],
+  },
+  {
+    question: 'Your room gets one impossible weather effect. Which one?',
+    answers: ['Warm afternoon sunlight', 'Gentle indoor snow', 'A dramatic thunderstorm', 'Perfect breeze on demand'],
+  },
+  {
+    question: 'A parade turns onto your street unexpectedly. Your move?',
+    answers: ['Join the front row', 'Find the best view', 'Start a side parade', 'Act like this was planned'],
+  },
 ];
 
 function tagCounts(items) {
@@ -49,23 +76,16 @@ function formatQuizHistory(history = []) {
     .join('\n') || '(none yet)';
 }
 
-function fallbackQuestion(topic, tags, remainingCount, questionCount = 0) {
-  const labels = [
-    'That one. Immediately.',
-    'Low-key, this.',
-    'Give me this energy.',
-    'I can work with this.',
-  ];
-  const theme = topic.toLowerCase() === 'random' ? 'your day' : topic;
-  const question = FALLBACK_QUESTION_BUILDERS[questionCount % FALLBACK_QUESTION_BUILDERS.length](theme);
+function fallbackQuestion(tags, remainingCount, questionCount = 0) {
+  const template = FALLBACK_QUESTION_TEMPLATES[questionCount % FALLBACK_QUESTION_TEMPLATES.length];
 
   return {
     done: false,
     source: 'fallback',
     remainingCount,
-    question,
+    question: template.question,
     options: Array.from({ length: tags.length > 0 ? 4 : 0 }, (_, index) => ({
-      label: labels[index],
+      label: template.answers[index],
       tags: [tags[index % tags.length][0]],
     })),
   };
@@ -194,7 +214,7 @@ Return one question object using the response format.`,
   const body = await response.json();
   const choice = body.choices?.[0];
   const finishReason = choice?.finish_reason || 'unknown';
-  console.info(`[quiz] Cerebras finish reason: ${finishReason}`);
+  console.info(`[quiz] Cerebras ${response.status} · ${model} · source=cerebras · finish=${finishReason}`);
   const content = choice?.message?.content;
   if (typeof content !== 'string' || !content.trim()) {
     throw new Error(`Cerebras returned no quiz content (finish_reason: ${finishReason}).`);
@@ -221,13 +241,13 @@ export async function nextQuizQuestion(payload = {}) {
     return { done: true, source: 'inventory', remainingCount: 0 };
   }
 
-  if (questionCount >= 5 || (questionCount >= 4 && remaining.length >= 4 && remaining.length <= 8)) {
+  if (questionCount >= 5 || (questionCount >= 4 && remaining.length <= 8)) {
     return { done: true, source: 'inventory', remainingCount: remaining.length };
   }
 
   const tags = tagCounts(remaining).filter(([, count]) => count > 0).slice(0, 18);
   if (tags.length < 4) {
-    return fallbackQuestion(payload.topic || 'Random', tags, remaining.length, questionCount);
+    return fallbackQuestion(tags, remaining.length, questionCount);
   }
 
   const allowedTags = new Set(tags.map(([tag]) => tag));
@@ -239,9 +259,9 @@ export async function nextQuizQuestion(payload = {}) {
       questionCount: quizFilters.length,
       quizHistory: Array.isArray(payload.quizHistory) ? payload.quizHistory : [],
     });
-    return normalizeQuestion(raw, allowedTags, remaining.length) || fallbackQuestion(payload.topic || 'Random', tags, remaining.length, questionCount);
+    return normalizeQuestion(raw, allowedTags, remaining.length) || fallbackQuestion(tags, remaining.length, questionCount);
   } catch (error) {
     console.warn('[quiz] Cerebras unavailable, using fallback:', error.message);
-    return fallbackQuestion(payload.topic || 'Random', tags, remaining.length, questionCount);
+    return fallbackQuestion(tags, remaining.length, questionCount);
   }
 }
