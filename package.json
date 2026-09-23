@@ -7,8 +7,8 @@
   "engines": { "node": ">=22" },
   "workspaces": ["apps/web", "services/api"],
   "scripts": {
-    "dev": "start-dev.bat",
-    "dev:web": "npm run dev --workspace apps/web",
+    "dev": "node scripts/dev.js",
+    "dev:web": "npm run dev:web --workspace apps/web",
     "dev:api": "npm run dev --workspace services/api",
     "build": "npm run build --workspace apps/web",
     "lint": "npm run lint --workspace apps/web && npm run lint --workspace services/api",

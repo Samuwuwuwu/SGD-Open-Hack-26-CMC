@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --configLoader runner",
+    "dev": "node ../../scripts/dev.js",
+    "dev:web": "vite --configLoader runner",
     "build": "vite build --configLoader runner",
     "lint": "eslint . --max-warnings 0"
   },
