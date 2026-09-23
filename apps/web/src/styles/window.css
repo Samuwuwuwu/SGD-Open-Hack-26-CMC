@@ -66,6 +66,7 @@
   .window-controls { font-size: 14px; }
   .window-interior { padding: 6px; gap: 6px; }
   .journey-sidebar { padding: 12px; }
+  .sidebar-gacha { display: none; }
   .progress-rail ol { gap: 6px; }
   .rail-step { flex-direction: column; justify-content: center; gap: 2px; padding: 5px 0; border-width: 2px; font-size: 11px; }
   .rail-step.active { padding: 4px 0; border-width: 3px; }

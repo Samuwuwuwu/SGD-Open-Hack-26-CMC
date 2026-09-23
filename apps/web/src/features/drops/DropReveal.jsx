@@ -12,9 +12,12 @@ function DropReveal({ drop, budget, preferences, preferenceOptions, claimed, onC
 
   return (
     <section className="reveal-panel">
-      <h2>Oh, <span className="highlight-word">there you are.</span></h2>
+      <h2 tabIndex={-1}>Oh, <span className="highlight-word">there you are.</span></h2>
       <div className="reveal-spotlight">
-        <div className="reveal-art"><span className="drop-category">{drop.category}</span><ProductArt category={drop.category} /></div>
+        <div className="reveal-art">
+          <span className="drop-category">{drop.category}</span>
+          {drop.imageUrl ? <img className="reveal-product-image" src={drop.imageUrl} alt={drop.name} /> : <><ProductArt category={drop.category} /><span className="reveal-art-note">Illustration</span></>}
+        </div>
         <div className="reveal-details">
           <p className="partner-name">{drop.partner}</p>
           <h3>{drop.name}</h3>

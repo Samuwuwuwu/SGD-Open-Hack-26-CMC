@@ -1,28 +1,28 @@
-import ProductArt from '../../components/ProductArt.jsx';
-import DropPrice from '../../components/DropPrice.jsx';
-
-function DropCandidates({ candidates, onReveal }) {
+function DropCandidates({ candidates, openedDrops, onReveal }) {
   return (
-    <section className="drops-section">
+    <section className="drops-section mystery-section">
       <div className="drops-heading">
         <h2>Good finds.<br /><span className="highlight-word">Your call.</span></h2>
-        <span className="candidate-count">{candidates.length} {candidates.length === 1 ? 'drop' : 'drops'}<span aria-hidden="true"> ✦</span></span>
+        <span className="candidate-count">{candidates.length} {candidates.length === 1 ? 'box' : 'boxes'}<span aria-hidden="true"> ✦</span></span>
       </div>
-      <p className="panel-copy">Pick a drop to see the details and why it fits.</p>
+      <p className="panel-copy">Read the clues, choose a box, then see what is inside.</p>
       {candidates.length > 0 ? (
-        <div className="drop-grid">
+        <div className="mystery-grid" style={{ '--box-count': Math.min(candidates.length, 5) }}>
           {candidates.map((candidate, index) => (
-            <article className="drop-card" key={candidate.id}>
-              <div className={`drop-art drop-art-${index % 3}`}>
-                <span className="drop-category">{candidate.category}</span>
-                <ProductArt category={candidate.category} />
+            <article className={`mystery-card ${openedDrops[candidate.id] ? 'opened' : ''}`} key={candidate.id}>
+              <div className={`mystery-box-art mystery-box-art-${index % 5}`} aria-hidden="true">
+                <span className="mystery-box-lid" />
+                <span className="mystery-box-body">{openedDrops[candidate.id] ? '✓' : '?'}</span>
               </div>
-              <div className="drop-card-content">
-                <p className="partner-name">{candidate.partner}</p>
-                <h3>{candidate.name}</h3>
-                <p className="drop-description">{candidate.description}</p>
-                <DropPrice drop={candidate} showDiscount />
-                <button className="primary-button reveal-button" type="button" onClick={() => onReveal(candidate)} aria-label={`Reveal ${candidate.name}`}>Reveal <span aria-hidden="true">↗</span></button>
+              <div className="mystery-card-content">
+                <h3>Box {String(index + 1).padStart(2, '0')} {openedDrops[candidate.id] && <span className="mystery-opened-label">Opened</span>}</h3>
+                <p className="mystery-teaser">{openedDrops[candidate.id]?.name || candidate.mystery.teaser}</p>
+                <dl className="mystery-clues">
+                  <div><dt>Palette</dt><dd>{candidate.mystery.primaryColour} + {candidate.mystery.secondaryColour}</dd></div>
+                  <div><dt>Made with</dt><dd>{candidate.mystery.materials}</dd></div>
+                  <div><dt>Category</dt><dd>{candidate.mystery.category}</dd></div>
+                </dl>
+                <button className="primary-button mystery-choose" type="button" onClick={() => onReveal(candidate, index + 1)}>{openedDrops[candidate.id] ? 'View reveal again' : 'Choose this box'} <span aria-hidden="true">↗</span></button>
               </div>
             </article>
           ))}
