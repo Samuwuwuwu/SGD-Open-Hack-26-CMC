@@ -23,7 +23,17 @@ const viteBin = path.join(path.dirname(req.resolve('vite/package.json')), 'bin/v
 console.log('\x1b[35m[rollover]\x1b[0m Starting API and Web dev servers...');
 console.log();
 
-const env = { ...process.env, FORCE_COLOR: '1' };
+const fileEnv = {};
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const separator = trimmed.indexOf('=');
+    if (separator === -1) continue;
+    fileEnv[trimmed.slice(0, separator).trim()] = trimmed.slice(separator + 1).trim();
+  }
+}
+const env = { ...fileEnv, ...process.env, FORCE_COLOR: '1' };
 
 function isPortInUse(port) {
   return new Promise((resolve) => {
