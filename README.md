@@ -22,17 +22,23 @@ The setup is repeat-safe, requires Node.js 22+, installs the npm lockfile, and c
 
 ## Development
 
+Run the full stack (API + Frontend) directly in your current terminal:
+
+```sh
+npm run dev
+```
+
+This starts both the backend API (`http://localhost:3001`) and the frontend (`http://localhost:5173`) concurrently with unified logs. You can run this command from the repository root, `apps/web`, or `services/api`. Stop both at any time with `Ctrl+C`.
+
+Alternatively, if you prefer dedicated Windows terminal windows:
+
 ```bat
 start-dev.bat
 ```
 
-The launcher opens one visible terminal for the API and one for the frontend, following the simple Windows workflow used by the reference projects. Each terminal owns its own watch/HMR process and can be stopped with Ctrl+C.
-
-- Frontend: http://localhost:5173
-- API: http://localhost:3001
-- API health: http://localhost:3001/api/health
-
-Equivalent npm commands are `npm run dev`, `npm run dev:web`, and `npm run dev:api`.
+Individual service commands are also available:
+- `npm run dev:web` — Frontend only
+- `npm run dev:api` — API only
 
 ## Validation
 
