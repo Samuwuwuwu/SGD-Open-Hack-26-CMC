@@ -34,9 +34,15 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
   assert.equal(new Set(body.items.map((item) => item.product_name)).size, 30);
   assert.equal(typeof body.items[0].retail_price, 'number');
   assert.equal(typeof body.items[0].surplus_price, 'number');
+  assert.equal(typeof body.items[0].discount_pct, 'number');
+  assert.ok(['markdown', 'protected'].includes(body.items[0].discount_mode));
+  assert.equal(typeof body.items[0].show_discount, 'boolean');
   assert.equal(typeof body.items[0].stock_qty, 'number');
   assert.equal(typeof body.items[0].active, 'boolean');
   assert.ok(body.items.every((item) => Array.isArray(item.tags)));
+  assert.ok(body.items.every((item) => item.discount_mode === 'markdown' || (item.discount_pct === 0 && item.show_discount === false && item.surplus_price === item.retail_price)));
+  assert.deepEqual(body.items.find((item) => item.product_name === 'Hyaluronic Acid Serum 50ml').discount_mode, 'protected');
+  assert.equal(body.items.find((item) => item.product_name === 'Truffle Sea Salt Mushroom Crisps').show_discount, true);
   assert.deepEqual(body.items.find((item) => item.product_name === 'Herbed Lentil Crisp Kit').allergens, []);
   assert.deepEqual(inventory, body.items);
 });

@@ -20,6 +20,15 @@ function boolean(value) {
   return ['true', '1', 'yes', 'y'].includes(text(value).toLowerCase());
 }
 
+function normalizeDiscountMode(value) {
+  return text(value).toLowerCase() === 'protected' ? 'protected' : 'markdown';
+}
+
+function normalizeDiscountPercent(value, mode) {
+  if (mode === 'protected') return 0;
+  return Math.min(100, Math.max(0, number(value)));
+}
+
 function pipeList(value) {
   return text(value)
     .split('|')
@@ -39,6 +48,9 @@ function description(row) {
 function normalizeRow(row) {
   const sizes = pipeList(row.sizes);
   const dietary = pipeList(row.dietary);
+  const retailPrice = number(row.retail_price);
+  const discountMode = normalizeDiscountMode(row.discount_mode);
+  const discountPct = normalizeDiscountPercent(row.discount_pct, discountMode);
 
   return {
     sku: text(row.sku),
@@ -47,8 +59,11 @@ function normalizeRow(row) {
     subcategory: text(row.subcategory),
     product_name: text(row.product_name),
     description: description(row),
-    retail_price: number(row.retail_price),
-    surplus_price: number(row.surplus_price),
+    retail_price: retailPrice,
+    surplus_price: discountMode === 'protected' ? retailPrice : number(row.surplus_price),
+    discount_mode: discountMode,
+    discount_pct: discountPct,
+    show_discount: discountMode === 'markdown' && discountPct > 0 && boolean(row.show_discount),
     stock_qty: number(row.stock_qty),
     surplus_reason: text(row.surplus_reason),
     days_in_surplus: number(row.days_in_surplus),
