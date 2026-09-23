@@ -1,6 +1,6 @@
-# Cutie Mark Crusaders
+# ROLLOVER
 
-Cutie Mark Crusaders (CMC) is a prototype for SDG Open Hack 2026, Challenge 2 / SDG 12. It explores a circular-retail flow where retail partners expose synthetic surplus inventory and customers move through a short preference experience that produces several explainable drop candidates before anything is fulfilled.
+ROLLOVER is a prototype for SDG Open Hack 2026, Challenge 2 / SDG 12. It explores a circular-retail flow where retail partners expose synthetic surplus inventory and customers move through a short preference experience that produces several explainable drop candidates before anything is fulfilled.
 
 This repository is intentionally small and demo-first. The current golden path is: budget → explicit preferences → matching → drop candidates → reveal.
 

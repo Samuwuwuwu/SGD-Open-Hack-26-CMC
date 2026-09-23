@@ -2,11 +2,11 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 chcp 65001 >nul
-title CMC DEV SETUP
+title ROLLOVER DEV SETUP
 
 echo.
 echo ============================================================
-echo                    CMC DEV SETUP
+echo                 ROLLOVER DEV SETUP
 echo ============================================================
 echo.
 
@@ -62,6 +62,6 @@ if not exist ".env" (
 )
 
 echo.
-echo [OK] CMC development setup is complete.
+echo [OK] ROLLOVER development setup is complete.
 echo [NEXT] Run npm run dev to launch the frontend and API.
 exit /b 0

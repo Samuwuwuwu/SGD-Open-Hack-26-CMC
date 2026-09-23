@@ -1,6 +1,6 @@
-# CMC engineering guide
+# ROLLOVER engineering guide
 
-Cutie Mark Crusaders is a JavaScript React/Vite + Node/Express prototype for SDG Open Hack 2026, Challenge 2 / SDG 12. It explores a circular-retail experience where surplus inventory becomes a small set of personalized drops that a customer can inspect before fulfilment.
+ROLLOVER is a JavaScript React/Vite + Node/Express prototype for SDG Open Hack 2026, Challenge 2 / SDG 12. It explores a circular-retail experience where surplus inventory becomes a small set of personalized drops that a customer can inspect before fulfilment.
 
 The current golden path is:
 

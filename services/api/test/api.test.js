@@ -16,10 +16,10 @@ after(async () => {
   await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
 });
 
-test('GET /api/health returns the CMC service contract', async () => {
+test('GET /api/health returns the ROLLOVER service contract', async () => {
   const response = await fetch(`${baseUrl}/api/health`);
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), { status: 'ok', service: 'cmc-api' });
+  assert.deepEqual(await response.json(), { status: 'ok', service: 'rollover-api' });
 });
 
 test('POST /api/drops/match respects budget and constraints deterministically', async () => {

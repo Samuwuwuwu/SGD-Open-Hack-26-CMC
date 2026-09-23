@@ -2,12 +2,12 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 chcp 65001 >nul
-title CMC LOCAL VALIDATION
+title ROLLOVER LOCAL VALIDATION
 set "FAILED=0"
 
 echo.
 echo ============================================================
-echo                   CMC LOCAL VALIDATION
+echo                ROLLOVER LOCAL VALIDATION
 echo ============================================================
 echo.
 echo [CHECK] Lint
@@ -24,9 +24,9 @@ if errorlevel 1 set "FAILED=1"
 
 if "%FAILED%"=="1" (
   echo.
-  echo [FAIL] One or more CMC checks failed.
+  echo [FAIL] One or more ROLLOVER checks failed.
   exit /b 1
 )
 echo.
-echo [OK] Local CMC validation passed.
+echo [OK] Local ROLLOVER validation passed.
 exit /b 0
