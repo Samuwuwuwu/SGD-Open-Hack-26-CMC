@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ProgressRail from './components/ProgressRail.jsx';
-import { preferenceOptions } from './data/demoInventory.js';
+import { preferenceOptions } from './data/preferenceOptions.js';
 import StartPanel from './features/onboarding/StartPanel.jsx';
 import PreferencePanel from './features/preferences/PreferencePanel.jsx';
 import DropCandidates from './features/drops/DropCandidates.jsx';
