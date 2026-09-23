@@ -43,13 +43,13 @@ function App() {
     }
   }, [stage]);
 
-  const findDrops = async (filters = quizFilters) => {
+  const findDrops = async (filters = quizFilters, preferenceTags = preferences) => {
     setError('');
     setIsMatching(true);
     setStage(3);
     try {
-      await createPreferenceSession({ budget, preferences, constraints });
-      const result = await matchDrops({ budget, preferences, constraints, quizFilters: filters });
+      await createPreferenceSession({ budget, preferences: preferenceTags, constraints });
+      const result = await matchDrops({ budget, preferences: preferenceTags, constraints, quizFilters: filters });
       setCandidates(result.candidates);
       setStage(4);
     } catch (requestError) {
@@ -60,7 +60,7 @@ function App() {
     }
   };
 
-  const loadQuestion = async (topic, filters) => {
+  const loadQuestion = async (topic, filters, preferenceTags = preferences) => {
     setError('');
     setQuizLoading(true);
     setQuizQuestion(null);
@@ -70,7 +70,7 @@ function App() {
       setQuizRemaining(result.remainingCount || 0);
 
       if (result.done) {
-        await findDrops(filters);
+        await findDrops(filters, preferenceTags);
         return;
       }
 
@@ -86,14 +86,15 @@ function App() {
     setQuizTopic(topic);
     setQuizFilters([]);
     setPreferences([]);
-    loadQuestion(topic, []);
+    loadQuestion(topic, [], []);
   };
 
   const answerQuestion = (option) => {
     const nextFilters = [...quizFilters, option.tags];
+    const nextPreferences = [...new Set([...preferences, ...option.tags])];
     setQuizFilters(nextFilters);
-    setPreferences((current) => [...new Set([...current, ...option.tags])]);
-    loadQuestion(quizTopic, nextFilters);
+    setPreferences(nextPreferences);
+    loadQuestion(quizTopic, nextFilters, nextPreferences);
   };
 
   const resetQuiz = () => {
