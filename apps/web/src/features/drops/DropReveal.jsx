@@ -1,8 +1,14 @@
 import ProductArt from '../../components/ProductArt.jsx';
 import DropPrice from '../../components/DropPrice.jsx';
 
+const impactPriceFormatter = new Intl.NumberFormat('en-SG', {
+  minimumSignificantDigits: 2,
+  maximumSignificantDigits: 2,
+});
+
 function DropReveal({ drop, budget, preferences, preferenceOptions, claimed, onClaim, onSwap }) {
   const matchingPreferences = preferenceOptions.filter((option) => preferences.includes(option.value) && drop.tags.includes(option.value));
+  const belowRetail = impactPriceFormatter.format(Math.max(0, drop.retailPrice - drop.availablePrice));
 
   return (
     <section className="reveal-panel">
@@ -25,7 +31,7 @@ function DropReveal({ drop, budget, preferences, preferenceOptions, claimed, onC
         {drop.constraints?.allergens?.length > 0 && <p>Contains: {drop.constraints.allergens.join(', ')}</p>}
       </div>
       <div className="impact-metrics" aria-label="Circular retail snapshot">
-        <div><strong>${Math.max(0, drop.retailPrice - drop.availablePrice)}</strong><span>Below retail</span></div>
+        <div><strong>${belowRetail}</strong><span>Below retail</span></div>
         <div><strong>{drop.stock}</strong><span>In demo stock</span></div>
       </div>
       <div className="reveal-actions">
