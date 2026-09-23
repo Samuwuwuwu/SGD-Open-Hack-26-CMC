@@ -16,6 +16,7 @@ function App() {
   const [constraints, setConstraints] = useState({ size: 'M', dietary: 'any' });
   const [quizTopic, setQuizTopic] = useState('');
   const [quizFilters, setQuizFilters] = useState([]);
+  const [quizHistory, setQuizHistory] = useState([]);
   const [quizQuestion, setQuizQuestion] = useState(null);
   const [quizRemaining, setQuizRemaining] = useState(0);
   const [quizLoading, setQuizLoading] = useState(false);
@@ -60,13 +61,13 @@ function App() {
     }
   };
 
-  const loadQuestion = async (topic, filters, preferenceTags = preferences) => {
+  const loadQuestion = async (topic, filters, preferenceTags = preferences, history = quizHistory) => {
     setError('');
     setQuizLoading(true);
     setQuizQuestion(null);
 
     try {
-      const result = await getQuizQuestion({ topic, budget, constraints, quizFilters: filters });
+      const result = await getQuizQuestion({ topic, budget, constraints, quizFilters: filters, quizHistory: history });
       setQuizRemaining(result.remainingCount || 0);
 
       if (result.done) {
@@ -85,21 +86,27 @@ function App() {
   const chooseTopic = (topic) => {
     setQuizTopic(topic);
     setQuizFilters([]);
+    setQuizHistory([]);
     setPreferences([]);
-    loadQuestion(topic, [], []);
+    loadQuestion(topic, [], [], []);
   };
 
   const answerQuestion = (option) => {
     const nextFilters = [...quizFilters, option.tags];
     const nextPreferences = [...new Set([...preferences, ...option.tags])];
+    const nextHistory = quizQuestion
+      ? [...quizHistory, { question: quizQuestion.question, answers: quizQuestion.options.map((answer) => answer.label) }]
+      : quizHistory;
     setQuizFilters(nextFilters);
+    setQuizHistory(nextHistory);
     setPreferences(nextPreferences);
-    loadQuestion(quizTopic, nextFilters, nextPreferences);
+    loadQuestion(quizTopic, nextFilters, nextPreferences, nextHistory);
   };
 
   const resetQuiz = () => {
     setQuizTopic('');
     setQuizFilters([]);
+    setQuizHistory([]);
     setQuizQuestion(null);
     setQuizRemaining(0);
     setPreferences([]);
