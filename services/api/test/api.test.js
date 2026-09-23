@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test, { after, before } from 'node:test';
 import app from '../src/app.js';
+import { getDemoInventory } from '../src/services/inventoryService.js';
 
 let server;
 let baseUrl;
@@ -22,6 +23,24 @@ test('GET /api/health returns the ROLLOVER service contract', async () => {
   assert.deepEqual(await response.json(), { status: 'ok', service: 'rollover-api' });
 });
 
+test('GET /api/inventory/demo returns normalized workbook inventory', async () => {
+  const response = await fetch(`${baseUrl}/api/inventory/demo`);
+  const body = await response.json();
+  const inventory = getDemoInventory();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.source, 'inventory.xlsx');
+  assert.equal(body.items.length, 30);
+  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 30);
+  assert.equal(typeof body.items[0].retail_price, 'number');
+  assert.equal(typeof body.items[0].surplus_price, 'number');
+  assert.equal(typeof body.items[0].stock_qty, 'number');
+  assert.equal(typeof body.items[0].active, 'boolean');
+  assert.ok(body.items.every((item) => Array.isArray(item.tags)));
+  assert.deepEqual(body.items.find((item) => item.product_name === 'Herbed Lentil Crisp Kit').allergens, []);
+  assert.deepEqual(inventory, body.items);
+});
+
 test('POST /api/drops/match respects budget and constraints deterministically', async () => {
   const response = await fetch(`${baseUrl}/api/drops/match`, {
     method: 'POST',
@@ -31,6 +50,6 @@ test('POST /api/drops/match respects budget and constraints deterministically', 
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.status, 'ok');
-  assert.deepEqual(body.candidates.map((candidate) => candidate.id), ['demo-005', 'demo-008', 'demo-006']);
-  assert.ok(body.candidates.every((candidate) => candidate.availablePrice <= 20));
+  assert.deepEqual(body.candidates.map((candidate) => candidate.sku), ['RO-010', 'RO-013', 'RO-028']);
+  assert.ok(body.candidates.every((candidate) => candidate.surplus_price <= 20));
 });
