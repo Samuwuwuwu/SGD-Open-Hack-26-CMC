@@ -161,23 +161,24 @@
   min-width: 0;
   min-height: 0;
   padding: var(--content-padding);
-  overflow-x: hidden;
-  overflow-y: auto;
+    overflow: hidden;
   outline: none;
 }
 .main-viewport > * { max-width: 100%; min-width: 0; }
 .journey-panel, .preference-panel, .budget-panel { max-width: 100%; min-width: 0; }
-.main-viewport.has-viewport-actions { display: flex; flex-direction: column; padding-bottom: 24px; }
-.main-viewport.has-viewport-actions > :not(.viewport-actions) { width: 100%; flex-shrink: 0; }
+.main-viewport.has-viewport-actions { padding-bottom: 0; }
 .viewport-actions {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+    z-index: 5;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  align-self: flex-end;
   gap: 10px;
   max-width: 100%;
-  margin-top: auto;
-  padding-top: 24px;
+    margin: 0;
+    padding: 0;
 }
 
 /* Landing-only composition treatment. The application geometry above stays shared. */
@@ -207,8 +208,7 @@
 
 @media (min-width: 1200px) and (max-height: 760px) {
   .prototype-frame { --content-padding: 20px; }
-  .main-viewport.has-viewport-actions { padding-bottom: 16px; }
-  .viewport-actions { padding-top: 16px; }
+  .viewport-actions { right: 20px; bottom: 20px; }
 }
 
 @media (max-width: 1199px) {
@@ -248,9 +248,9 @@
   .rail-step.active { padding: 4px 0; border-width: 3px; }
   .rail-number { width: 24px; height: 24px; font-size: 10px; }
   .main-viewport { min-height: 0; padding: 24px 16px; overflow: visible; }
-  .main-viewport.has-viewport-actions { padding-bottom: 24px; }
-  .viewport-actions { align-self: stretch; margin-top: 24px; padding-top: 0; }
-  .viewport-actions > button { flex: 1 1 auto; }
+  .main-viewport.has-viewport-actions { padding-bottom: 0; }
+  .viewport-actions { position: static; justify-content: flex-start; margin-top: 24px; }
+  .viewport-actions > .button-hitbox { flex: 1 1 auto; }
   .shell--landing .welcome-composition { grid-template-columns: minmax(0, 1fr); gap: 24px; min-height: 0; }
   .shell--landing .welcome-copy h2 { font-size: 48px; }
   .shell--landing .welcome-copy .highlight-word { font-size: clamp(38px, 12vw, 48px); }

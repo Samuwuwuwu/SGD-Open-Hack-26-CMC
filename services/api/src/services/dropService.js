@@ -1,47 +1,25 @@
 import { inventory } from '../data/inventory.js';
-import { findDropCandidates } from '../domain/matching.js';
+import { buildDropBundle } from '../domain/matching.js';
 
-function displayCategory(item) {
-  if (item.category === 'fashion') return item.subcategory === 'accessories' ? 'Accessories' : 'Clothing';
-  if (item.category === 'cosmetics') return 'Cosmetics';
-  if (item.category === 'food') return 'Food & drink';
-  if (item.subcategory === 'accessories') return 'Accessories';
-  return item.category.replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-export function buildDropCandidates(payload = {}) {
-  const candidates = findDropCandidates({
+export function buildDropBundleResponse(payload = {}) {
+  const items = buildDropBundle({
     inventory,
     budget: payload.budget,
     preferences: payload.preferences,
     constraints: payload.constraints,
     quizFilters: payload.quizFilters,
   });
+  const budget = Number(payload.budget);
+  const total = Math.round(items.reduce((sum, item) => sum + item.surplus_price, 0) * 100) / 100;
 
   return {
     source: 'inventory.xlsx',
-    status: candidates.length > 0 ? 'ok' : 'no_viable_match',
-    candidates: candidates.map((item) => ({
-      id: item.sku,
-      mystery: {
-        category: displayCategory(item),
-        primaryColour: item.primary_colour,
-        secondaryColour: item.secondary_colour,
-        materials: item.materials,
-        teaser: item.mystery_teaser,
-      },
-    })),
+    status: items.length > 0 ? 'ok' : 'no_viable_match',
+    drop: items.length > 0 ? {
+      id: `DROP-${items.map((item) => item.sku).join('-')}`,
+      items: items.map(({ matchScore: _matchScore, ...item }) => item),
+      total,
+      budget,
+    } : null,
   };
-}
-
-export function revealDropCandidate(payload = {}) {
-  const candidate = findDropCandidates({
-    inventory,
-    budget: payload.budget,
-    preferences: payload.preferences,
-    constraints: payload.constraints,
-    quizFilters: payload.quizFilters,
-  }).find((item) => item.sku === payload.id);
-
-  return candidate || null;
 }

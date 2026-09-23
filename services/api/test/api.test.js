@@ -3,7 +3,7 @@ import test, { after, before } from 'node:test';
 import app from '../src/app.js';
 import { getDemoInventory } from '../src/services/inventoryService.js';
 import { nextQuizQuestion } from '../src/services/quizService.js';
-import { findDropCandidates } from '../src/domain/matching.js';
+import { buildDropBundle, findDropCandidates } from '../src/domain/matching.js';
 
 let server;
 let baseUrl;
@@ -50,8 +50,8 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
   assert.deepEqual(inventory, body.items);
 });
 
-test('POST /api/drops/match respects budget and constraints deterministically', async () => {
-  const payload = { budget: 20, preferences: ['shareable'], constraints: { dietary: 'vegan', size: 'any' } };
+test('POST /api/drops/match builds one budget-safe, varied bundle deterministically', async () => {
+  const payload = { budget: 60, preferences: ['shareable'], constraints: { dietary: 'vegan', size: 'any' } };
   const response = await fetch(`${baseUrl}/api/drops/match`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -60,27 +60,12 @@ test('POST /api/drops/match respects budget and constraints deterministically', 
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.status, 'ok');
-  assert.deepEqual(body.candidates.map((candidate) => candidate.id), ['RO-010', 'RO-013', 'RO-028', 'RO-025', 'RO-014']);
-  assert.ok(body.candidates.every((candidate) => Object.keys(candidate).sort().join(',') === 'id,mystery'));
-  assert.ok(body.candidates.every((candidate) => candidate.mystery.primaryColour && candidate.mystery.secondaryColour && candidate.mystery.materials && candidate.mystery.category && candidate.mystery.teaser));
-  assert.ok(!JSON.stringify(body.candidates).includes('Truffle Sea Salt Mushroom Crisps'));
-
-  const revealed = await fetch(`${baseUrl}/api/drops/reveal`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...payload, id: body.candidates[0].id }),
-  });
-  const revealBody = await revealed.json();
-  assert.equal(revealed.status, 200);
-  assert.equal(revealBody.item.product_name, 'Truffle Sea Salt Mushroom Crisps');
-  assert.ok(revealBody.item.surplus_price <= payload.budget);
-
-  const unavailable = await fetch(`${baseUrl}/api/drops/reveal`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...payload, id: 'RO-001' }),
-  });
-  assert.equal(unavailable.status, 409);
+  assert.deepEqual(body.drop.items.map((item) => item.sku), ['RO-010', 'RO-028', 'RO-025', 'RO-009']);
+  assert.ok(body.drop.items.length >= 4 && body.drop.items.length <= 8);
+  assert.ok(body.drop.total <= payload.budget);
+  assert.equal(body.drop.budget, payload.budget);
+  assert.equal(new Set(body.drop.items.map((item) => item.category)).size, body.drop.items.length);
+  assert.ok(body.drop.items.every((item) => item.product_name && item.surplus_price <= payload.budget));
 });
 
 test('matching fills a sparse quiz result with other eligible stock, up to three boxes', () => {
@@ -92,6 +77,18 @@ test('matching fills a sparse quiz result with other eligible stock, up to three
   ];
   const candidates = findDropCandidates({ inventory, budget: 50, quizFilters: [['rare']] });
   assert.deepEqual(candidates.map((item) => item.sku), ['A', 'B', 'C']);
+});
+
+test('bundle matching never exceeds the budget while preferring category variety', () => {
+  const inventory = [
+    { sku: 'A', active: true, stock_qty: 1, surplus_price: 20, category: 'food', tags: ['rare'] },
+    { sku: 'B', active: true, stock_qty: 1, surplus_price: 20, category: 'food', tags: ['other'] },
+    { sku: 'C', active: true, stock_qty: 1, surplus_price: 20, category: 'home', tags: ['other'] },
+    { sku: 'D', active: true, stock_qty: 1, surplus_price: 20, category: 'tech', tags: ['other'] },
+  ];
+  const bundle = buildDropBundle({ inventory, budget: 60, quizFilters: [['rare']] });
+  assert.deepEqual(bundle.map((item) => item.sku), ['A', 'C', 'D']);
+  assert.ok(bundle.reduce((total, item) => total + item.surplus_price, 0) <= 60);
 });
 
 test('quiz requests strict structured output and keeps inventory tag validation', async () => {

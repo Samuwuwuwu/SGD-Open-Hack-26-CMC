@@ -5,7 +5,7 @@ ROLLOVER is a JavaScript React/Vite + Node/Express prototype for SDG Open Hack 2
 The current golden path is:
 
 ```text
-budget → explicit preferences → matching → multiple drop candidates → reveal
+budget -> explicit preferences -> matching -> one bundle -> multi-pull reveal -> keep/remove -> claim drop
 ```
 
 ## Prototype-first
@@ -20,6 +20,13 @@ Optimize for the shortest correct path to a reliable demo. Keep the concept easy
 - `data/inventory.xlsx` is the committed demo inventory source; keep product facts in that workbook and let the API normalize them.
 - API routes stay thin; matching and other business logic belong in API services/domain modules.
 - Avoid duplicate frontend/backend implementations of the same product rule.
+
+## Drop flow
+
+- A Drop is one personalized bundle, not one product or one mystery box.
+- `/api/drops/match` should return one budget-safe `drop` with its selected items and total.
+- The client owns reveal animation and keep/remove selection; do not reintroduce candidate, selected-box, or single-product reveal state.
+- Use `ROLL`, `DROP`, `REVEAL`, `KEEP`, `REMOVE`, and `CLAIM DROP` consistently. Avoid choose-box, choose-drop, confirm-drop, and reveal-candidate language.
 
 ## Product facts and AI
 

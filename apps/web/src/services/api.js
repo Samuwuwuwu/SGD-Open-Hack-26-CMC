@@ -49,8 +49,13 @@ export const getApiHealth = () => request('/api/health');
 export const getDemoInventory = () => request('/api/inventory/demo');
 export const createPreferenceSession = (payload) => request('/api/preferences/session', { method: 'POST', body: JSON.stringify(payload) });
 export const getQuizQuestion = (payload) => request('/api/preferences/question', { method: 'POST', body: JSON.stringify(payload) });
-export const matchDrops = (payload) => request('/api/drops/match', { method: 'POST', body: JSON.stringify(payload) });
-export const revealDrop = async (payload) => {
-  const result = await request('/api/drops/reveal', { method: 'POST', body: JSON.stringify(payload) });
-  return mapDrop(result.item);
+export const matchDrops = async (payload) => {
+  const result = await request('/api/drops/match', { method: 'POST', body: JSON.stringify(payload) });
+  return {
+    ...result,
+    drop: result.drop ? {
+      ...result.drop,
+      items: result.drop.items.map(mapDrop),
+    } : null,
+  };
 };
