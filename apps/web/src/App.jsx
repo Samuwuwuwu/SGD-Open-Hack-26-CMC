@@ -46,11 +46,11 @@ function App() {
     <main className="app-shell">
       <div className="ambient-orb ambient-orb-left" />
       <div className="ambient-orb ambient-orb-right" />
-      <section className="prototype-frame" aria-label="Cutie Mark Crusaders prototype">
+      <section className="prototype-frame" aria-label="ROLLOVER prototype">
         <header className="topbar">
           <div className="brand-lockup">
-            <span className="brand-mark">CMC</span>
-            <div><p className="eyebrow">Circular retail, made personal</p><h1>Cutie Mark Crusaders</h1></div>
+            <span className="brand-mark">ROLL</span>
+            <div><p className="eyebrow">Circular retail, made personal</p><h1>ROLLOVER</h1></div>
           </div>
           <div className={`api-pill api-${apiState.status}`}><span className="status-dot" />
             {apiState.status === 'connected' ? `Demo inventory · ${apiState.inventoryCount} items` : apiState.status === 'checking' ? 'Connecting to demo API' : 'API unavailable'}

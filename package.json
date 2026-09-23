@@ -1,8 +1,8 @@
 {
-  "name": "cutie-mark-crusaders",
+  "name": "rollover",
   "private": true,
   "version": "0.1.0",
-  "description": "SDG Open Hack 2026 Challenge 2 prototype",
+  "description": "ROLLOVER prototype for SDG Open Hack 2026 Challenge 2",
   "type": "module",
   "engines": { "node": ">=22" },
   "workspaces": ["apps/web", "services/api"],
