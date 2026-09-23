@@ -1,0 +1,60 @@
+.drops-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.drops-heading h2 { font-size: 44px; }
+.candidate-count, .drop-category, .discount-badge, .match-tags > span { padding: 5px 10px; border: 2px solid var(--ink); border-radius: 9999px; box-shadow: 2px 2px 0 var(--ink); background: var(--lime); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.candidate-count { white-space: nowrap; background: var(--cyan); transform: rotate(-3deg); }
+.drop-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.drop-card { display: flex; flex-direction: column; min-width: 0; border: var(--border); border-radius: 8px; box-shadow: var(--shadow); background: var(--surface); }
+.drop-art { position: relative; height: 176px; margin: 12px 12px 0; border: 3px solid var(--ink); border-radius: 5px; background: var(--inset); box-shadow: inset 3px 3px 0 var(--ink); }
+.drop-category { position: absolute; z-index: 1; left: -8px; top: 8px; transform: rotate(-3deg); }
+.drop-art-1 .drop-category { background: var(--cyan); }
+.drop-art-2 .drop-category { background: var(--magenta); }
+.product-illustration { position: relative; display: grid; place-items: center; height: 100%; }
+.product-illustration svg { width: 85%; max-width: 200px; height: 80%; }
+.illustration-sparkle { position: absolute; right: 8px; top: 32px; font-size: 22px; }
+.illustration-orbit { position: absolute; left: 8px; bottom: 8px; font-size: 28px; }
+.drop-card-content { display: flex; flex-direction: column; flex: 1; padding: 16px; }
+.partner-name { margin-bottom: 8px; font-size: 10px; }
+.drop-card h3 { margin-bottom: 12px; font-size: 20px; }
+.drop-description { flex: 1; margin-bottom: 16px; font-size: 13px; }
+.drop-price { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 0; margin-bottom: 20px; font-family: var(--font-mono); }
+.drop-price strong { font-size: 26px; }
+.drop-price del { font-size: 12px; }
+.discount-badge { background: var(--magenta); padding: 3px 7px; }
+.reveal-button { width: 100%; margin-top: 0; padding-inline: 12px; }
+.empty-state { padding: 32px; border: 4px solid var(--ink); border-radius: 8px; background: var(--inset); box-shadow: inset 4px 4px 0 var(--ink); text-align: center; }
+.empty-glyph { display: block; font-size: 56px; }
+.empty-state p { margin-bottom: 0; }
+.reveal-panel > h2 { font-size: 38px; }
+.reveal-spotlight { display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; margin: 32px 0 24px; }
+.reveal-art { position: relative; min-height: 230px; border: 4px solid var(--ink); border-radius: 8px; background: var(--inset); box-shadow: inset 4px 4px 0 var(--ink); }
+.reveal-art .product-illustration { min-height: 230px; }
+.reveal-details { padding-top: 8px; }
+.reveal-details h3 { margin-bottom: 12px; }
+.reveal-details .panel-copy { font-size: 14px; margin-bottom: 16px; }
+.match-reasons { padding: 20px; border: var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
+.match-reasons h3 { font-size: 20px; margin-bottom: 12px; }
+.match-reasons p { font-size: 13px; margin-bottom: 8px; }
+.match-reasons p:last-child { margin-bottom: 0; }
+.match-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.match-tags > span { background: var(--cyan); }
+.impact-metrics { display: flex; justify-content: space-around; gap: 16px; margin: 24px 0; }
+.impact-metrics > div { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.impact-metrics strong { display: grid; place-items: center; width: 72px; height: 72px; border: 3px solid var(--ink); border-radius: 50%; box-shadow: 3px 3px 0 var(--ink); background: var(--lime); font-family: var(--font-mono); font-size: 23px; }
+.impact-metrics > div:nth-child(2) strong { background: var(--cyan); }
+.impact-metrics > div:nth-child(3) strong { background: var(--magenta); }
+.impact-metrics span { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
+.reveal-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+@media (max-width: 767px) {
+  .drops-heading h2 { font-size: 36px; }
+  .candidate-count { padding: 5px 8px; font-size: 9px; }
+  .drop-grid { grid-template-columns: 1fr; gap: 24px; }
+  .drop-art { height: 192px; }
+  .drop-card-content { padding: 20px; }
+  .drop-card h3 { font-size: 24px; }
+  .reveal-spotlight { grid-template-columns: 1fr; }
+  .reveal-panel > h2 { font-size: 32px; }
+  .reveal-art { max-width: 320px; width: 100%; margin: auto; }
+  .reveal-actions > button { flex: 1; }
+  .impact-metrics { gap: 8px; }
+  .impact-metrics span { font-size: 8px; }
+}
