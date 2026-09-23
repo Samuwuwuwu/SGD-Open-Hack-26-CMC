@@ -34,22 +34,31 @@
 .budget-slider::-moz-range-thumb { width: 26px; height: 26px; border: 3px solid var(--ink); border-radius: 8px; background: var(--orange); box-shadow: 3px 3px 0 var(--ink); }
 .range-labels { display: flex; justify-content: space-between; margin-top: 8px; }
 @media (min-width: 768px) {
-  .budget-panel { max-width: 700px; margin-block: 24px; }
-  .budget-panel h2 { font-size: clamp(44px, 4.8vw, 64px); margin-bottom: 28px; }
-  .budget-panel .panel-copy { max-width: 640px; margin-bottom: 28px; font-size: 17px; }
-  .budget-console { margin-top: 36px; padding: 30px; }
-  .budget-readout { min-width: 190px; margin: 20px auto 36px; font-size: 56px; }
+  .budget-panel { max-width: 700px; margin-block: 18px; }
+  .budget-panel h2 { font-size: clamp(44px, 4.8vw, 64px); margin-bottom: 6px; }
+  .budget-panel .panel-copy { max-width: 640px; margin-bottom: 14px; font-size: 17px; }
+  .budget-console { margin-top: 20px; padding: 20px; }
+  .budget-readout { min-width: 190px; margin: 12px auto 20px; font-size: 56px; }
 }
 @media (min-width: 768px) and (max-height: 800px) {
-  .budget-panel { margin-block: 12px; }
-  .budget-console { margin-top: 28px; }
-  .budget-readout { margin: 16px auto 28px; }
+  .budget-panel { margin-block: 8px; }
+  .budget-console { margin-top: 22px; }
+  .budget-readout { margin: 12px auto 22px; }
 }
 @media (min-width: 768px) and (max-height: 740px) {
-  .budget-panel { margin-block: 4px; }
-  .budget-panel h2, .budget-panel .panel-copy { margin-bottom: 16px; }
-  .budget-console { margin-top: 20px; padding: 24px; }
-  .budget-readout { margin: 12px auto 20px; }
+  .budget-panel { margin-block: 2px; }
+  .budget-panel h2 { margin-bottom: 4px; }
+  .budget-panel .panel-copy { margin-bottom: 10px; }
+  .budget-console { margin-top: 14px; padding: 18px; }
+  .budget-readout { margin: 8px auto 14px; }
+}
+@media (min-width: 1200px) and (max-height: 760px) {
+  .budget-panel { margin-block: 0; }
+  .budget-panel h2 { margin-bottom: 0; font-size: 44px; line-height: 1.1; }
+  .budget-panel .panel-copy { margin-bottom: 4px; }
+  .budget-console { margin-top: 6px; padding: 10px; }
+  .budget-readout { margin: 2px auto 6px; font-size: 40px; }
+  .budget-slider { height: 30px; }
 }
 .preference-panel h2 { font-size: clamp(32px, 3.5vw, 44px); }
 .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0 32px; }
@@ -112,14 +121,26 @@
 @keyframes quiz-spin { to { transform: rotate(360deg); } }
 @media (min-width: 768px) and (max-height: 1100px) {
   .preference-panel:not(.quiz-panel) .quiz-kicker { margin-bottom: 8px; }
-  .preference-panel:not(.quiz-panel) h2 { margin-bottom: 22px; }
-  .preference-panel:not(.quiz-panel) .panel-copy { margin-bottom: 22px; }
-  .preference-panel:not(.quiz-panel) .topic-grid { gap: clamp(12px, 1.8svh, 18px); margin: clamp(20px, 3svh, 28px) 0; }
-  .preference-panel:not(.quiz-panel) .topic-chip { min-height: clamp(68px, 9.5svh, 88px); }
-  .preference-panel:not(.quiz-panel) .constraint-panel { padding: clamp(18px, 2.8svh, 26px); }
+  .preference-panel:not(.quiz-panel) h2 { margin-bottom: 12px; }
+  .preference-panel:not(.quiz-panel) .panel-copy { margin-bottom: 12px; }
+  .preference-panel:not(.quiz-panel) .topic-grid { gap: clamp(12px, 1.8svh, 18px); margin: clamp(10px, 1.8svh, 18px) 0; }
+  .preference-panel:not(.quiz-panel) .topic-chip { min-height: clamp(64px, 9svh, 82px); }
+  .preference-panel:not(.quiz-panel) .constraint-panel { padding: clamp(14px, 2.4svh, 22px); }
   .preference-panel:not(.quiz-panel) .constraint-grid { gap: 16px; }
   .preference-panel:not(.quiz-panel) .constraint-grid label { gap: 8px; }
   .preference-panel:not(.quiz-panel) .constraint-grid select { min-height: 48px; padding: 10px; }
+}
+@media (min-width: 1200px) and (max-height: 760px) {
+  .preference-panel:not(.quiz-panel) .quiz-kicker { margin-bottom: 4px; }
+  .preference-panel:not(.quiz-panel) h2, .preference-panel:not(.quiz-panel) .panel-copy { margin-bottom: 6px; }
+  .preference-panel:not(.quiz-panel) .topic-grid { gap: 8px; margin: 6px 0; }
+  .preference-panel:not(.quiz-panel) .topic-chip { min-height: 52px; }
+  .preference-panel:not(.quiz-panel) .constraint-panel { padding: 8px; }
+  .preference-panel:not(.quiz-panel) .constraint-grid select { min-height: 38px; padding: 5px 10px; }
+  .quiz-meta { margin-bottom: 12px; }
+  .quiz-question { margin-bottom: 12px; font-size: 32px !important; }
+  .quiz-answer-grid { gap: 10px; margin: 12px 0; }
+  .quiz-answer { min-height: 62px; padding: 10px; font-size: 14px; }
 }
 @media (max-width: 767px) {
   .topic-grid, .quiz-answer-grid { grid-template-columns: 1fr; }

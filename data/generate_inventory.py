@@ -48,6 +48,74 @@ PRODUCTS = [
     {"provider": "Paper Moon", "category": "stationery", "subcategory": "accessories", "name": "Brass Bookmark Set", "price": 24.00, "stock": 7, "colours": "brass|black", "tags": "stationery|minimal|classic|decorative|shareable", "reason": "packaging_update", "discount_mode": "protected", "discount_pct": 0, "show_discount": False},
 ]
 
+# The workbook is the API's source for the visible mystery-box clues.
+# Colours describe the item or its demo packaging where appropriate.
+MYSTERY_FACTS = {
+    1: ("black", "olive", "cotton blend"),
+    2: ("oat", "forest green", "cotton knit"),
+    3: ("natural", "colourful", "recycled cotton"),
+    4: ("charcoal", "beige", "polyester blend"),
+    5: ("neon yellow", "black", "polyester mesh"),
+    6: ("berry", "rose", "wax and botanical oils"),
+    7: ("clear", "white", "water-based serum"),
+    8: ("green", "cream", "clay and green tea"),
+    9: ("yellow", "white", "shea butter and citrus oils"),
+    10: ("black", "cream", "potato and mushroom seasoning"),
+    11: ("green", "gold", "sparkling water and botanical extracts"),
+    12: ("brown", "cream", "wheat pastry and almond filling"),
+    13: ("orange", "white", "oats and citrus"),
+    14: ("green", "cream", "lentils and herbs"),
+    15: ("green", "terracotta", "seed paper and potting mix"),
+    16: ("navy", "sand", "recycled polyester fleece"),
+    17: ("lavender", "cream", "bath salts and lavender"),
+    18: ("blue", "silver", "recycled steel"),
+    19: ("amber", "cream", "soy wax"),
+    20: ("terracotta", "sand", "ceramic"),
+    21: ("speckled", "cream", "terrazzo composite"),
+    22: ("clear", "smoke", "reclaimed glass"),
+    23: ("matte black", "white", "plastic and silicone"),
+    24: ("sage green", "black", "aluminium and plastic"),
+    25: ("black", "colourful", "braided nylon and copper"),
+    26: ("black", "silver", "plastic and foam"),
+    27: ("forest green", "cream", "linen and paper"),
+    28: ("colourful", "natural", "recycled paper"),
+    29: ("blue", "coral", "fabric and rubber"),
+    30: ("brass", "black", "brass"),
+}
+
+MYSTERY_TEASERS = {
+    1: "For the days you leave with no fixed plan.",
+    2: "A softer pace can still make an entrance.",
+    3: "For the detours that become the best part.",
+    4: "A little structure for whatever comes next.",
+    5: "A bright wildcard for after-dark plans.",
+    6: "A tiny confidence boost for unexpected plans.",
+    7: "A calm reset in the middle of everything.",
+    8: "When the day asks you to slow down.",
+    9: "A little sunshine for the in-between moments.",
+    10: "The break with a sense of adventure.",
+    11: "For the toast nobody saw coming.",
+    12: "A cozy pause worth sharing.",
+    13: "A bright little detour between plans.",
+    14: "For an easy gathering that lasts longer.",
+    15: "A fresh start in a small space.",
+    16: "For journeys with room to get comfortable.",
+    17: "An invitation to make ordinary evenings quieter.",
+    18: "A practical sidekick with a little wanderlust.",
+    19: "A small ritual for winding down.",
+    20: "For slow mornings and familiar company.",
+    21: "A place for the little things you keep.",
+    22: "The everyday moment, made a bit more special.",
+    23: "A private soundtrack for your next move.",
+    24: "A little backup for the unplanned day.",
+    25: "Small connections can take you far.",
+    26: "A focused moment in a noisy world.",
+    27: "Plans feel lighter when there is room to dream.",
+    28: "For ideas that arrive out of nowhere.",
+    29: "A fresh mood for your usual space.",
+    30: "A small detail for your next favorite page.",
+}
+
 
 def generate_inventory():
     today = datetime(2026, 9, 23)
@@ -55,12 +123,14 @@ def generate_inventory():
 
     for index, product in enumerate(PRODUCTS, start=1):
         category = product["category"]
+        primary_colour, secondary_colour, materials = MYSTERY_FACTS[index]
         rows.append({
             "sku": f"RO-{index:03d}",
             "provider": product["provider"],
             "category": category,
             "subcategory": product["subcategory"],
             "product_name": product["name"],
+            "image_url": product.get("image_url", ""),
             "retail_price": round(product["price"], 2),
             "surplus_price": round(product["price"] * (1 - product["discount_pct"] / 100), 2),
             "discount_mode": product["discount_mode"],
@@ -72,6 +142,10 @@ def generate_inventory():
             "expiry_date": (today + timedelta(days=2 + index % 13)).strftime("%Y-%m-%d") if category == "food" else "",
             "sizes": product.get("sizes", ""),
             "colours": product.get("colours", ""),
+            "primary_colour": primary_colour,
+            "secondary_colour": secondary_colour,
+            "materials": materials,
+            "mystery_teaser": MYSTERY_TEASERS[index],
             "tags": product["tags"],
             "dietary": product.get("dietary", ""),
             "allergens": product.get("allergens", ""),

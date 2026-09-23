@@ -3,6 +3,7 @@ import test, { after, before } from 'node:test';
 import app from '../src/app.js';
 import { getDemoInventory } from '../src/services/inventoryService.js';
 import { nextQuizQuestion } from '../src/services/quizService.js';
+import { findDropCandidates } from '../src/domain/matching.js';
 
 let server;
 let baseUrl;
@@ -41,6 +42,7 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
   assert.equal(typeof body.items[0].stock_qty, 'number');
   assert.equal(typeof body.items[0].active, 'boolean');
   assert.ok(body.items.every((item) => Array.isArray(item.tags)));
+  assert.ok(body.items.every((item) => item.primary_colour && item.secondary_colour && item.materials && item.mystery_teaser));
   assert.ok(body.items.every((item) => item.discount_mode === 'markdown' || (item.discount_pct === 0 && item.show_discount === false && item.surplus_price === item.retail_price)));
   assert.deepEqual(body.items.find((item) => item.product_name === 'Hyaluronic Acid Serum 50ml').discount_mode, 'protected');
   assert.equal(body.items.find((item) => item.product_name === 'Truffle Sea Salt Mushroom Crisps').show_discount, true);
@@ -49,16 +51,47 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
 });
 
 test('POST /api/drops/match respects budget and constraints deterministically', async () => {
+  const payload = { budget: 20, preferences: ['shareable'], constraints: { dietary: 'vegan', size: 'any' } };
   const response = await fetch(`${baseUrl}/api/drops/match`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ budget: 20, preferences: ['shareable'], constraints: { dietary: 'vegan', size: 'any' } }),
+    body: JSON.stringify(payload),
   });
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.status, 'ok');
-  assert.deepEqual(body.candidates.map((candidate) => candidate.sku), ['RO-010', 'RO-013', 'RO-028']);
-  assert.ok(body.candidates.every((candidate) => candidate.surplus_price <= 20));
+  assert.deepEqual(body.candidates.map((candidate) => candidate.id), ['RO-010', 'RO-013', 'RO-028', 'RO-025', 'RO-014']);
+  assert.ok(body.candidates.every((candidate) => Object.keys(candidate).sort().join(',') === 'id,mystery'));
+  assert.ok(body.candidates.every((candidate) => candidate.mystery.primaryColour && candidate.mystery.secondaryColour && candidate.mystery.materials && candidate.mystery.category && candidate.mystery.teaser));
+  assert.ok(!JSON.stringify(body.candidates).includes('Truffle Sea Salt Mushroom Crisps'));
+
+  const revealed = await fetch(`${baseUrl}/api/drops/reveal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...payload, id: body.candidates[0].id }),
+  });
+  const revealBody = await revealed.json();
+  assert.equal(revealed.status, 200);
+  assert.equal(revealBody.item.product_name, 'Truffle Sea Salt Mushroom Crisps');
+  assert.ok(revealBody.item.surplus_price <= payload.budget);
+
+  const unavailable = await fetch(`${baseUrl}/api/drops/reveal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...payload, id: 'RO-001' }),
+  });
+  assert.equal(unavailable.status, 409);
+});
+
+test('matching fills a sparse quiz result with other eligible stock, up to three boxes', () => {
+  const inventory = [
+    { sku: 'A', active: true, stock_qty: 1, surplus_price: 20, tags: ['rare'] },
+    { sku: 'B', active: true, stock_qty: 1, surplus_price: 25, tags: ['other'] },
+    { sku: 'C', active: true, stock_qty: 1, surplus_price: 30, tags: ['other'] },
+    { sku: 'D', active: true, stock_qty: 1, surplus_price: 70, tags: ['other'] },
+  ];
+  const candidates = findDropCandidates({ inventory, budget: 50, quizFilters: [['rare']] });
+  assert.deepEqual(candidates.map((item) => item.sku), ['A', 'B', 'C']);
 });
 
 test('quiz requests strict structured output and keeps inventory tag validation', async () => {

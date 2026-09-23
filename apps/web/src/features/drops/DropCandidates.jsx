@@ -5,19 +5,19 @@ import DropPrice from '../../components/DropPrice.jsx';
 
 function DropCandidates({ candidates, onReveal }) {
   return (
-    <section className="drops-section">
+    <section className="drops-section mystery-section">
       <div className="drops-heading">
         <h2>Good finds.<br /><span className="highlight-word">Your call.</span></h2>
         <span className="candidate-count">{candidates.length} {candidates.length === 1 ? 'drop' : 'drops'}<IconGlyph name="sparkles" size={13} /></span>
       </div>
-      <p className="panel-copy">Pick a drop to see the details and why it fits.</p>
+      <p className="panel-copy">Read the clues, choose a box, then see what is inside.</p>
       {candidates.length > 0 ? (
-        <div className="drop-grid">
+        <div className="mystery-grid" style={{ '--box-count': Math.min(candidates.length, 5) }}>
           {candidates.map((candidate, index) => (
-            <article className="drop-card" key={candidate.id}>
-              <div className={`drop-art drop-art-${index % 3}`}>
-                <span className="drop-category">{candidate.category}</span>
-                <ProductArt category={candidate.category} />
+            <article className={`mystery-card ${openedDrops[candidate.id] ? 'opened' : ''}`} key={candidate.id}>
+              <div className={`mystery-box-art mystery-box-art-${index % 5}`} aria-hidden="true">
+                <span className="mystery-box-lid" />
+                <span className="mystery-box-body">{openedDrops[candidate.id] ? '✓' : '?'}</span>
               </div>
               <div className="drop-card-content">
                 <p className="partner-name">{candidate.partner}</p>

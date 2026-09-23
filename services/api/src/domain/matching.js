@@ -38,8 +38,14 @@ function scoreItem(item, preferences = []) {
 }
 
 export function findDropCandidates({ inventory, budget, preferences = [], constraints = {}, quizFilters = [] }) {
-  return filterInventory({ inventory, budget, constraints, quizFilters })
+  const ranked = (filters) => filterInventory({ inventory, budget, constraints, quizFilters: filters })
     .map((item) => ({ ...item, matchScore: scoreItem(item, preferences) }))
-    .sort((left, right) => right.matchScore - left.matchScore || left.surplus_price - right.surplus_price || left.sku.localeCompare(right.sku))
-    .slice(0, 3);
+    .sort((left, right) => right.matchScore - left.matchScore || left.surplus_price - right.surplus_price || left.sku.localeCompare(right.sku));
+
+  const exact = ranked(quizFilters).slice(0, 5);
+  if (exact.length >= 3) return exact;
+
+  const chosen = new Set(exact.map((item) => item.sku));
+  const nearby = ranked([]).filter((item) => !chosen.has(item.sku)).slice(0, 3 - exact.length);
+  return [...exact, ...nearby];
 }

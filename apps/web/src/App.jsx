@@ -6,8 +6,8 @@ import { preferenceOptions } from './data/preferenceOptions.js';
 import StartPanel from './features/onboarding/StartPanel.jsx';
 import PreferencePanel from './features/preferences/PreferencePanel.jsx';
 import DropCandidates from './features/drops/DropCandidates.jsx';
-import DropReveal from './features/drops/DropReveal.jsx';
-import { createPreferenceSession, getQuizQuestion, matchDrops } from './services/api.js';
+import UnboxingReveal from './features/drops/UnboxingReveal.jsx';
+import { createPreferenceSession, getQuizQuestion, matchDrops, revealDrop } from './services/api.js';
 
 const stages = ['Start', 'Range', 'Quiz', 'Match', 'Drops', 'Reveal'];
 
@@ -23,12 +23,18 @@ function App() {
   const [quizRemaining, setQuizRemaining] = useState(0);
   const [quizLoading, setQuizLoading] = useState(false);
   const [candidates, setCandidates] = useState([]);
+  const [selectedBox, setSelectedBox] = useState(null);
   const [selectedDrop, setSelectedDrop] = useState(null);
+  const [openedDrops, setOpenedDrops] = useState({});
+  const [revisitingBox, setRevisitingBox] = useState(false);
+  const [revealError, setRevealError] = useState('');
+  const [revealAttempt, setRevealAttempt] = useState(0);
   const [error, setError] = useState('');
   const [isMatching, setIsMatching] = useState(false);
   const [claimedDropId, setClaimedDropId] = useState(null);
   const viewportRef = useRef(null);
   const previousStage = useRef(stage);
+  const revealRequestId = useRef(0);
 
   useEffect(() => {
     if (previousStage.current !== stage) {
@@ -46,6 +52,10 @@ function App() {
     try {
       await createPreferenceSession({ budget, preferences: preferenceTags, constraints });
       const result = await matchDrops({ budget, preferences: preferenceTags, constraints, quizFilters: filters });
+      revealRequestId.current += 1;
+      setOpenedDrops({});
+      setSelectedBox(null);
+      setSelectedDrop(null);
       setCandidates(result.candidates);
       setStage(4);
     } catch (requestError) {
@@ -99,12 +109,61 @@ function App() {
   };
 
   const resetQuiz = () => {
+    revealRequestId.current += 1;
     setQuizTopic('');
     setQuizFilters([]);
     setQuizHistory([]);
     setQuizQuestion(null);
     setQuizRemaining(0);
     setPreferences([]);
+    setCandidates([]);
+    setSelectedBox(null);
+    setSelectedDrop(null);
+    setOpenedDrops({});
+    setRevisitingBox(false);
+    setRevealError('');
+    setClaimedDropId(null);
+  };
+
+  const requestReveal = async (box) => {
+    const requestId = ++revealRequestId.current;
+    setRevealError('');
+    try {
+      const drop = await revealDrop({ id: box.id, budget, preferences, constraints, quizFilters });
+      if (requestId !== revealRequestId.current) return;
+      setSelectedDrop(drop);
+      setOpenedDrops((previous) => ({ ...previous, [box.id]: drop }));
+    } catch (requestError) {
+      if (requestId === revealRequestId.current) setRevealError(requestError.message);
+    }
+  };
+
+  const chooseBox = (box, number) => {
+    const previousReveal = openedDrops[box.id];
+    revealRequestId.current += 1;
+    setSelectedBox({ ...box, number });
+    setRevisitingBox(Boolean(previousReveal));
+    setRevealAttempt(0);
+    setRevealError('');
+    setSelectedDrop(previousReveal || null);
+    setStage(5);
+    if (!previousReveal) requestReveal(box);
+  };
+
+  const navigateToStage = (nextStage) => {
+    revealRequestId.current += 1;
+    setSelectedBox(null);
+    setSelectedDrop(null);
+    setRevisitingBox(false);
+    setRevealError('');
+    setStage(nextStage);
+  };
+
+  const retryReveal = () => {
+    if (!selectedBox) return;
+    setSelectedDrop(null);
+    setRevealAttempt((previous) => previous + 1);
+    requestReveal(selectedBox);
   };
 
   return (
@@ -119,7 +178,7 @@ function App() {
           </span>
         </header>
         <div className="window-interior">
-          <ProgressRail stages={stages} currentStage={stage} onNavigate={setStage} isMatching={isMatching} />
+          <ProgressRail stages={stages} currentStage={stage} onNavigate={navigateToStage} isMatching={isMatching} />
           <div className="viewport-stack">
             <div className={`main-viewport ${stage !== 0 && stage !== 3 ? 'has-viewport-actions' : ''}`} id="main-viewport" ref={viewportRef} tabIndex={-1} aria-label={`${stages[stage]} stage`}>
               {error && <div className="error-banner" role="alert">{error}</div>}
@@ -156,8 +215,17 @@ function App() {
                   <p className="panel-copy">Your answers are narrowing the live surplus pool.</p>
                 </section>
               )}
-              {stage === 4 && <DropCandidates candidates={candidates} onReveal={(drop) => { setSelectedDrop(drop); setStage(5); }} />}
-              {stage === 5 && selectedDrop && <DropReveal drop={selectedDrop} budget={budget} preferences={preferences} preferenceOptions={preferenceOptions} claimed={claimedDropId === selectedDrop.id} />}
+              {stage === 4 && <DropCandidates candidates={candidates} openedDrops={openedDrops} onReveal={chooseBox} />}
+              {stage === 5 && selectedBox && <UnboxingReveal
+                key={`${selectedBox.id}-${revealAttempt}`}
+                box={selectedBox}
+                drop={selectedDrop}
+                error={revealError}
+                alreadyOpened={revisitingBox}
+                onRetry={retryReveal}
+                onBack={() => navigateToStage(4)}
+                revealProps={{ budget, preferences, preferenceOptions, claimed: claimedDropId === selectedDrop?.id, onClaim: () => setClaimedDropId(selectedDrop?.id) }}
+              />}
 
               {stage === 1 && (
                 <div className="viewport-actions" aria-label="Range actions">

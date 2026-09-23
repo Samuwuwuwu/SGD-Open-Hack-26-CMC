@@ -6,16 +6,23 @@ const impactPriceFormatter = new Intl.NumberFormat('en-SG', {
   minimumSignificantDigits: 2,
   maximumSignificantDigits: 2,
 });
+const budgetDifferenceFormatter = new Intl.NumberFormat('en-SG', {
+  maximumFractionDigits: 2,
+});
 
 function DropReveal({ drop, budget, preferences, preferenceOptions, claimed }) {
   const matchingPreferences = preferenceOptions.filter((option) => preferences.includes(option.value) && drop.tags.includes(option.value));
   const belowRetail = impactPriceFormatter.format(Math.max(0, drop.retailPrice - drop.availablePrice));
+  const remainingBudget = budgetDifferenceFormatter.format(Math.max(0, budget - drop.availablePrice));
 
   return (
     <section className="reveal-panel">
-      <h2>Oh, <span className="highlight-word">there you are.</span></h2>
+      <h2 tabIndex={-1}>Oh, <span className="highlight-word">there you are.</span></h2>
       <div className="reveal-spotlight">
-        <div className="reveal-art"><span className="drop-category">{drop.category}</span><ProductArt category={drop.category} /></div>
+        <div className="reveal-art">
+          <span className="drop-category">{drop.category}</span>
+          {drop.imageUrl ? <img className="reveal-product-image" src={drop.imageUrl} alt={drop.name} /> : <><ProductArt category={drop.category} /><span className="reveal-art-note">Illustration</span></>}
+        </div>
         <div className="reveal-details">
           <p className="partner-name">{drop.partner}</p>
           <h3>{drop.name}</h3>
