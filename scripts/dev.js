@@ -51,7 +51,7 @@ const webPortInUse = await isPortInUse(5173);
 
 const api = apiPortInUse
   ? null
-  : spawn(process.execPath, ['--watch', 'src/server.js'], {
+  : spawn(process.execPath, ['--watch', '--watch-path=src', '--watch-path=../../data/inventory.xlsx', 'src/server.js'], {
       cwd: path.join(rootDir, 'services/api'),
       env,
       stdio: ['ignore', 'pipe', 'pipe'],

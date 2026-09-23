@@ -1,7 +1,21 @@
 async function request(path, options) {
-  const response = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error?.message || 'The demo API request failed.');
+  let response;
+  try {
+    response = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
+  } catch {
+    throw new Error('The demo API is temporarily unavailable. Please try again.');
+  }
+
+  const text = await response.text();
+  let body;
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {
+    body = null;
+  }
+
+  if (!response.ok) throw new Error(body?.error?.message || 'The demo API is temporarily unavailable. Please try again.');
+  if (!body) throw new Error('The demo API returned an invalid response. Please try again.');
   return body;
 }
 

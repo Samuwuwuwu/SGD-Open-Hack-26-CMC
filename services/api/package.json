@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node ../../scripts/dev.js",
-    "dev:api": "node --watch src/server.js",
+    "dev:api": "node --watch --watch-path=src --watch-path=../../data/inventory.xlsx src/server.js",
     "start": "node src/server.js",
     "lint": "eslint src test --max-warnings 0",
     "test": "node --test"
