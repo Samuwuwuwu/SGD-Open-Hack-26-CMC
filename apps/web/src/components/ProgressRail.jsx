@@ -1,4 +1,4 @@
-function ProgressRail({ stages, currentStage, onNavigate, isMatching, apiState }) {
+function ProgressRail({ stages, currentStage, onNavigate, isMatching }) {
   return (
     <aside className="journey-sidebar">
       <a className="brand-lockup" href="#main-viewport" aria-label="ROLLOVER, jump to content">
@@ -28,9 +28,13 @@ function ProgressRail({ stages, currentStage, onNavigate, isMatching, apiState }
           })}
         </ol>
       </nav>
-      <div className="sidebar-bottom">
-        <div className="inventory-label"><span className={`status-dot api-${apiState.status}`} /> Inventory feed</div>
-        <div className="inventory-count">{apiState.status === 'connected' ? <><strong>{String(apiState.inventoryCount).padStart(2, '0')}</strong> demo items</> : apiState.status === 'checking' ? 'Tuning in…' : 'Feed offline'}</div>
+      <div className="sidebar-gacha" aria-hidden="true">
+        <span className="sidebar-gacha-label">GOOD FINDS, RE-ROLLED</span>
+        <div className="sidebar-capsule-tray">
+          <span className="sidebar-capsule capsule-cyan" />
+          <span className="sidebar-capsule capsule-pink" />
+          <span className="sidebar-capsule capsule-orange" />
+        </div>
       </div>
     </aside>
   );

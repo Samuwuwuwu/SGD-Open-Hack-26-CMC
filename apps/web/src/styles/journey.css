@@ -91,6 +91,17 @@
 .quiz-loading h2 { margin: 0; }
 .quiz-spinner { display: block; font-size: 54px; animation: quiz-spin .8s linear infinite; }
 @keyframes quiz-spin { to { transform: rotate(360deg); } }
+@media (min-width: 768px) and (max-height: 1100px) {
+  .preference-panel:not(.quiz-panel) .quiz-kicker { margin-bottom: 8px; }
+  .preference-panel:not(.quiz-panel) h2 { margin-bottom: 18px; }
+  .preference-panel:not(.quiz-panel) .panel-copy { margin-bottom: 18px; }
+  .preference-panel:not(.quiz-panel) .topic-grid { gap: 12px; margin: 20px 0; }
+  .preference-panel:not(.quiz-panel) .topic-chip { min-height: 68px; }
+  .preference-panel:not(.quiz-panel) .constraint-panel { padding: 18px; }
+  .preference-panel:not(.quiz-panel) .constraint-grid { gap: 16px; }
+  .preference-panel:not(.quiz-panel) .constraint-grid label { gap: 8px; }
+  .preference-panel:not(.quiz-panel) .constraint-grid select { min-height: 48px; padding: 10px; }
+}
 @media (max-width: 767px) {
   .topic-grid, .quiz-answer-grid { grid-template-columns: 1fr; }
   .quiz-answer { min-height: 66px; font-size: 14px; }
