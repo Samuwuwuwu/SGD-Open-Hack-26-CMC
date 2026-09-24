@@ -28,6 +28,7 @@ function App() {
   const [quizHistory, setQuizHistory] = useState([]);
   const [quizQuestion, setQuizQuestion] = useState(null);
   const [quizRemaining, setQuizRemaining] = useState(0);
+  const [quizAvailable, setQuizAvailable] = useState(0);
   const [quizLoading, setQuizLoading] = useState(false);
   const [candidates, setCandidates] = useState([]);
   const [matchPayload, setMatchPayload] = useState(null);
@@ -78,6 +79,7 @@ function App() {
     setQuizHistory([]);
     setQuizQuestion(null);
     setQuizRemaining(0);
+    setQuizAvailable(0);
     setQuizLoading(false);
     setPreferences([]);
     setError('');
@@ -113,6 +115,7 @@ function App() {
       const result = await getQuizQuestion({ recipientMode, topic, budget, constraints, quizFilters: filters, quizHistory: history });
       if (requestId !== quizRequest.current) return;
       setQuizRemaining(result.remainingCount || 0);
+      setQuizAvailable(result.availableCount || 0);
       if (result.done) await findDrops(filters, preferenceTags, requestId);
       else setQuizQuestion(result);
     } catch (requestError) {
@@ -229,7 +232,7 @@ function App() {
         <div className="window-interior">
           <ProgressRail stages={stages} currentStage={stage} availableStages={availableStages} onNavigate={navigateToStage} isMatching={screen === 'matching' || quizLoading} />
           <div className="viewport-stack">
-            <div className={`main-viewport ${!['start', 'matching', 'boxes'].includes(screen) ? 'has-viewport-actions' : ''} ${screen === 'quiz' ? 'is-quiz' : ''} ${screen === 'boxes' ? 'is-box-selection' : ''} ${['pulls', 'haul'].includes(screen) ? 'is-item-pulls' : ''} ${screen === 'summary' ? 'is-haul-summary' : ''}`} id="main-viewport" ref={viewportRef} tabIndex={-1} aria-label={`${screen} stage`}>
+            <div className={`main-viewport ${!['start', 'matching', 'boxes'].includes(screen) ? 'has-viewport-actions' : ''} ${screen === 'quiz' ? 'is-quiz' : ''} ${screen === 'category' ? 'is-category' : ''} ${screen === 'boxes' ? 'is-box-selection' : ''} ${['pulls', 'haul'].includes(screen) ? 'is-item-pulls' : ''} ${screen === 'summary' ? 'is-haul-summary' : ''}`} id="main-viewport" ref={viewportRef} tabIndex={-1} aria-label={`${screen} stage`}>
               {error && <div className="error-banner" role="alert">{error}</div>}
               {screen === 'start' && <StartPanel onStart={() => setScreen('who')} />}
               {screen === 'who' && <section className="journey-panel budget-panel">
@@ -283,7 +286,7 @@ function App() {
                 </div>
               </section>}
               {screen === 'quiz' && <>
-                <PreferencePanel topic={quizTopic} question={quizQuestion} remainingCount={quizRemaining} isLoading={quizLoading} recipientMode={recipientMode}
+                <PreferencePanel topic={quizTopic} question={quizQuestion} remainingCount={quizRemaining} availableCount={quizAvailable} isLoading={quizLoading} recipientMode={recipientMode}
                   onChooseTopic={chooseTopic} onAnswer={answerQuestion} onResetTopic={resetQuiz} />
                 {error && quizTopic && !quizLoading && <ButtonLift><button className="primary-button" type="button" onClick={() => loadQuestion(quizTopic, quizFilters)}>Try again<IconGlyph name="refresh" size={18} /></button></ButtonLift>}
               </>}

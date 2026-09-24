@@ -198,7 +198,28 @@
 
 @media (min-width: 1200px) {
   .window-interior { grid-template-rows: minmax(0, 1fr); }
-  .journey-sidebar { min-height: 0; overflow-y: auto; }
+  .shell--landing, .shell--experience {
+    --sidebar-padding: 12px 14px;
+    --brand-margin: clamp(8px, 1.7svh, 18px);
+    --rail-gap: clamp(5px, 1.2svh, 15px);
+    --rail-step-min-height: clamp(34px, 4.5svh, 56px);
+    --rail-step-font-size: 13px;
+  }
+  .journey-sidebar { min-height: 0; overflow: hidden; }
+  .progress-rail { display: flex; flex: 1; min-height: 0; }
+  .shell--experience .progress-rail { margin-bottom: 16px; }
+  .progress-rail ol { flex: 1; grid-template-rows: repeat(7, minmax(0, 1fr)); width: 100%; }
+  .progress-rail li { display: flex; align-items: center; min-height: 0; }
+  .progress-rail li .button-hitbox { width: 100%; height: min(100%, 68px); }
+  .brand-symbol { margin-bottom: 7px; }
+  .brand-lockup h1 { margin-bottom: 2px; font-size: 25px; }
+  .rail-step { gap: 7px; height: 100%; padding: 4px 9px; }
+  .rail-step.active { padding: 3px 8px; }
+  .rail-number { width: 24px; height: 24px; font-size: 10px; }
+  .sidebar-gacha { margin-top: 0; padding: 7px; }
+  .sidebar-gacha-label { margin-bottom: 5px; }
+  .sidebar-capsule-tray { min-height: 50px; padding: 4px; }
+  .sidebar-capsule, .shell--experience .sidebar-capsule { width: 30px; height: 30px; }
 }
 
 @media (min-width: 1200px) and (max-height: 760px) {
@@ -211,6 +232,17 @@
 @media (min-width: 1200px) and (max-height: 760px) {
   .prototype-frame { --content-padding: 20px; }
   .viewport-actions { right: 20px; bottom: 20px; }
+}
+
+@media (min-width: 1200px) and (max-height: 620px) {
+  .shell--landing, .shell--experience { --rail-step-min-height: 30px; --brand-margin: 8px; }
+  .shell--experience .progress-rail { margin-bottom: 0; }
+  .sidebar-gacha { display: none; }
+  .brand-symbol { width: 32px; height: 32px; }
+  .brand-lockup h1 { font-size: 22px; }
+  .rail-step { padding-block: 2px; }
+  .rail-step.active { padding-block: 1px; }
+  .rail-number { width: 22px; height: 22px; }
 }
 
 @media (max-width: 1199px) {

@@ -6,9 +6,8 @@ import { money, words } from './dropPresentation.js';
 export default function HaulSummary({ drop, claimed, onClaim, onBack, onReplay }) {
   return (
     <section className={`haul-summary theme-${drop.theme}`} aria-labelledby="haul-title">
-      <div className="drop-screen-heading"><div><p className="quiz-kicker">{drop.label} / YOUR HAUL</p><h2 id="haul-title" tabIndex={-1}>A second chance.<br /><span className="highlight-word">A very good choice.</span></h2></div><span className="haul-stamp"><IconGlyph name="check" size={22} />RE-ROLLED</span></div>
+      <div className="drop-screen-heading"><div><p className="quiz-kicker">{drop.label} / YOUR HAUL</p><h2 id="haul-title" tabIndex={-1}>A second chance. <span className="highlight-word">A very good choice.</span></h2></div><span className="haul-stamp"><IconGlyph name="check" size={22} />RE-ROLLED</span></div>
       <div className="haul-receipt"><div><span>YOUR BOX</span><strong>{drop.items.length} {drop.items.length === 1 ? 'find' : 'finds'}</strong></div><div><span>BOX TOTAL</span><strong>{money(drop.total)}</strong></div><div><span>YOUR BUDGET</span><strong>{money(drop.budget)}</strong></div></div>
-      <p className="panel-copy haul-intro">{drop.matchReasons.length ? `Picked with your ${drop.matchReasons.join(', ').toLowerCase()} side in mind. ` : 'A new mix from the surplus shelf. '}Open any item below for the full story.</p>
       <div className="haul-items">
         {drop.items.map((item, index) => <details className="haul-item" key={item.id}>
           <summary><span className="haul-item-number">{String(index + 1).padStart(2, '0')}</span><ItemArtwork item={item} /><span className="haul-item-title"><small>{words(item.category)} / {item.partner}</small><strong>{item.name}</strong>{item.condition && item.condition !== 'new' && <small>PRE-LOVED · {words(item.condition)}</small>}<span>View details</span></span><span className="haul-expand" aria-hidden="true">+</span></summary>
@@ -27,8 +26,11 @@ export default function HaulSummary({ drop, claimed, onClaim, onBack, onReplay }
           </dl></div>
         </details>)}
       </div>
-      <div className="haul-footer"><div><strong>Ready to keep this box?</strong><p role="status">{claimed ? 'Your demo pick is saved for this session.' : 'Inspect every find before saving your pick.'}</p></div><ButtonLift><button className="primary-button" type="button" onClick={onClaim} disabled={claimed}>{claimed ? 'Pick saved' : 'Save this drop'}<IconGlyph name={claimed ? 'check' : 'arrowUpRight'} size={18} /></button></ButtonLift></div>
-      <div className="drop-screen-actions"><ButtonLift><button className="secondary-button" type="button" onClick={onBack}><IconGlyph name="arrowLeft" size={18} />Compare boxes</button></ButtonLift><ButtonLift><button className="secondary-button" type="button" onClick={onReplay}>Replay opening<IconGlyph name="refresh" size={18} /></button></ButtonLift></div>
+      <div className="haul-actions" aria-label="Haul actions">
+        <div className="haul-secondary-actions"><ButtonLift><button className="secondary-button" type="button" onClick={onBack}><IconGlyph name="arrowLeft" size={18} />Compare boxes</button></ButtonLift><ButtonLift><button className="secondary-button" type="button" onClick={onReplay}>Replay opening<IconGlyph name="refresh" size={18} /></button></ButtonLift></div>
+        <ButtonLift><button className="primary-button" type="button" onClick={onClaim} disabled={claimed}>{claimed ? 'Pick saved' : 'Save this drop'}<IconGlyph name={claimed ? 'check' : 'arrowUpRight'} size={18} /></button></ButtonLift>
+        <span className="haul-save-status" role="status">{claimed ? 'Saved for this session.' : ''}</span>
+      </div>
       <p className="microcopy">Demo selection only. No payment or fulfilment takes place.</p>
     </section>
   );
