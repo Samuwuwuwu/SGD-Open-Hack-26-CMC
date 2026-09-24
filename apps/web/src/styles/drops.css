@@ -40,6 +40,7 @@
 .match-reasons p:last-child { margin-bottom: 0; }
 .match-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 .match-tags > span { display: inline-flex; align-items: center; gap: 4px; background: var(--cyan); }
+.condition-badge { display: inline-block; width: fit-content; margin: 0 0 12px; padding: 4px 8px; border: 2px solid var(--ink); border-radius: 999px; background: var(--lime); box-shadow: 2px 2px 0 var(--ink); font-family: var(--font-mono); font-size: 10px; font-weight: 800; }
 .impact-metrics { display: flex; justify-content: space-around; gap: 16px; margin: 24px 0; }
 .impact-metrics > div { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .impact-metrics strong { display: grid; place-items: center; width: 72px; height: 72px; border: 3px solid var(--ink); border-radius: 50%; box-shadow: 3px 3px 0 var(--ink); background: var(--lime); font-family: var(--font-mono); font-size: 23px; }

@@ -3,6 +3,15 @@ function includesAny(values = [], wanted = []) {
 }
 
 function satisfiesConstraints(item, constraints = {}) {
+  const requestedCategories = constraints.categories || [];
+  if (requestedCategories.length > 0 && !requestedCategories.includes(item.category)) return false;
+
+  const conditionMode = constraints.conditionMode || 'new_only';
+  const allowedConditions = conditionMode === 'allow_preloved'
+    ? ['new', 'preloved_like_new', 'preloved_good']
+    : ['new'];
+  if (!allowedConditions.includes(item.condition)) return false;
+
   const requestedSize = constraints.size;
   const itemSizes = item.sizes || [];
   if (requestedSize && requestedSize !== 'any' && itemSizes.length > 0 && !itemSizes.includes(requestedSize)) return false;

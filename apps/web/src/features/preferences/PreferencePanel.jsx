@@ -8,8 +8,7 @@ function PreferencePanel({
   question,
   remainingCount,
   isLoading,
-  constraints,
-  onConstraintsChange,
+  recipientMode,
   onChooseTopic,
   onAnswer,
   onResetTopic,
@@ -18,8 +17,8 @@ function PreferencePanel({
     return (
       <section className="journey-panel preference-panel">
         <p className="quiz-kicker">PICK YOUR QUIZ</p>
-        <h2>How should we <span className="highlight-word">read you?</span></h2>
-        <p className="panel-copy">Pick a topic. The questions change with what is actually in stock.</p>
+        <h2>{recipientMode === 'gift' ? <>What are they <span className="highlight-word">into?</span></> : <>How should we <span className="highlight-word">read you?</span></>}</h2>
+        <p className="panel-copy">{recipientMode === 'gift' ? 'Pick something that feels like them.' : 'Pick a topic. The questions change with what is actually in stock.'}</p>
 
         <div className="topic-grid">
           {topics.map((item) => (
@@ -29,22 +28,6 @@ function PreferencePanel({
           ))}
         </div>
 
-        <div className="constraint-panel">
-          <div className="constraint-grid">
-            <label>
-              Size, if relevant
-              <select value={constraints.size} onChange={(event) => onConstraintsChange({ ...constraints, size: event.target.value })}>
-                <option value="any">Any size</option><option value="S">Small</option><option value="M">Medium</option><option value="L">Large</option>
-              </select>
-            </label>
-            <label>
-              Food preference, if relevant
-              <select value={constraints.dietary} onChange={(event) => onConstraintsChange({ ...constraints, dietary: event.target.value })}>
-                <option value="any">No restriction</option><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option>
-              </select>
-            </label>
-          </div>
-        </div>
       </section>
     );
   }

@@ -46,6 +46,13 @@ PRODUCTS = [
     {"provider": "Paper Moon", "category": "stationery", "subcategory": "notebooks", "name": "Recycled Dot Grid Notebook", "price": 16.00, "stock": 20, "colours": "colourful|natural", "tags": "stationery|playful|practical|colourful|shareable", "reason": "surplus_stock", "discount_mode": "markdown", "discount_pct": 10, "show_discount": True},
     {"provider": "Loop & Light", "category": "stationery", "subcategory": "desk accessories", "name": "Colour Block Desk Mat", "price": 52.00, "stock": 4, "colours": "blue|coral|cream", "tags": "stationery|bold|colourful|practical|decorative", "reason": "display_refresh", "discount_mode": "protected", "discount_pct": 0, "show_discount": False},
     {"provider": "Paper Moon", "category": "stationery", "subcategory": "accessories", "name": "Brass Bookmark Set", "price": 24.00, "stock": 7, "colours": "brass|black", "tags": "stationery|minimal|classic|decorative|shareable", "reason": "packaging_update", "discount_mode": "protected", "discount_pct": 0, "show_discount": False},
+
+    # Pre-loved / recommerce inventory
+    {"provider": "Second Spin Studio", "category": "fashion", "subcategory": "outerwear", "name": "Pre-Loved Denim Overshirt", "price": 74.00, "stock": 2, "sizes": "M|L", "colours": "indigo|faded_blue", "tags": "fashion|classic|edgy|practical|bold|streetwear", "reason": "quality_checked_return", "discount_mode": "markdown", "discount_pct": 30, "show_discount": True, "condition": "preloved_like_new"},
+    {"provider": "LoopBack Tech", "category": "electronics", "subcategory": "audio", "name": "Refurbished Pocket Headphones", "price": 52.00, "stock": 2, "colours": "matte_black|silver", "tags": "tech|portable|practical|energetic|audio", "reason": "quality_checked_return", "discount_mode": "protected", "discount_pct": 0, "show_discount": False, "condition": "preloved_like_new"},
+    {"provider": "Good Again Goods", "category": "home goods", "subcategory": "lighting", "name": "Pre-Loved Ceramic Table Lamp", "price": 36.00, "stock": 3, "colours": "cream|terracotta", "tags": "home|cozy|calm|decorative|practical|minimal", "reason": "display_refresh", "discount_mode": "markdown", "discount_pct": 35, "show_discount": True, "condition": "preloved_good"},
+    {"provider": "Paper Again", "category": "stationery", "subcategory": "planners", "name": "Like-New Desk Planner Folio", "price": 18.00, "stock": 4, "colours": "forest_green|cream", "tags": "stationery|practical|minimal|calm|clean", "reason": "quality_checked_return", "discount_mode": "protected", "discount_pct": 0, "show_discount": False, "condition": "preloved_like_new"},
+    {"provider": "Archive Again", "category": "fashion", "subcategory": "accessories", "name": "Pre-Loved Silk Scarf", "price": 28.00, "stock": 3, "colours": "berry|navy", "tags": "fashion|classic|colourful|bold|shareable", "reason": "display_refresh", "discount_mode": "markdown", "discount_pct": 25, "show_discount": True, "condition": "preloved_good"},
 ]
 
 # The workbook is the API's source for the visible mystery-box clues.
@@ -81,6 +88,11 @@ MYSTERY_FACTS = {
     28: ("colourful", "natural", "recycled paper"),
     29: ("blue", "coral", "fabric and rubber"),
     30: ("brass", "black", "brass"),
+    31: ("indigo", "faded blue", "cotton denim"),
+    32: ("matte black", "silver", "recycled plastic and metal"),
+    33: ("cream", "terracotta", "ceramic and recycled metal"),
+    34: ("forest green", "cream", "linen and recycled paper"),
+    35: ("berry", "navy", "silk"),
 }
 
 MYSTERY_TEASERS = {
@@ -114,6 +126,11 @@ MYSTERY_TEASERS = {
     28: "For ideas that arrive out of nowhere.",
     29: "A fresh mood for your usual space.",
     30: "A small detail for your next favorite page.",
+    31: "A second-life layer with plenty of stories left.",
+    32: "Checked, cleaned, and ready for another soundtrack.",
+    33: "A warm glow with a little more history.",
+    34: "A tidy desk companion looking for a new rhythm.",
+    35: "A well-loved accent for a brighter detour.",
 }
 
 
@@ -149,7 +166,7 @@ def generate_inventory():
             "tags": product["tags"],
             "dietary": product.get("dietary", ""),
             "allergens": product.get("allergens", ""),
-            "condition": "new",
+            "condition": product.get("condition", "new"),
             "active": product.get("active", True),
         })
 

@@ -8,6 +8,12 @@ function formatCategory(category = '') {
   return category.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function formatCondition(condition) {
+  if (condition === 'preloved_like_new') return 'PRE-LOVED · LIKE NEW';
+  if (condition === 'preloved_good') return 'PRE-LOVED · GOOD CONDITION';
+  return '';
+}
+
 function BundleReveal({ drop, budget, preferences, preferenceOptions, claimed, onClaim, onBack }) {
   const items = useMemo(() => drop?.items || [], [drop?.items]);
   const [reducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -171,6 +177,7 @@ function BundleReveal({ drop, budget, preferences, preferenceOptions, claimed, o
           <div className="bundle-detail-main">
             <p className="partner-name">{activeItem.partner}</p>
             <h3>{activeItem.name}</h3>
+            {formatCondition(activeItem.condition) && <span className="condition-badge">{formatCondition(activeItem.condition)}</span>}
             <p className="panel-copy">{activeItem.description}</p>
             <DropPrice drop={activeItem} showDiscount />
           </div>

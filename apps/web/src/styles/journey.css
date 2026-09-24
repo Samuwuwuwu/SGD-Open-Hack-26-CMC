@@ -24,6 +24,13 @@
 .art-sticker { position: absolute; right: -8px; bottom: 12px; padding: 10px 16px; border: 2px solid var(--ink); border-radius: 9999px; box-shadow: 2px 2px 0 var(--ink); background: var(--magenta); font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-align: center; transform: rotate(-3deg); }
 .art-sticker span { display: inline-flex; align-items: center; gap: 3px; }
 .budget-panel { max-width: 600px; margin: 16px auto; }
+.range-controls { display: grid; gap: 18px; margin-top: 22px; }
+.range-control-block { display: grid; gap: 10px; }
+.range-control-block > .rail-label { margin-bottom: 0; }
+.range-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.category-choice-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.range-choice-grid .button-hitbox { display: flex; min-width: 0; }
+.range-choice-grid .choice-chip { min-height: 48px; padding: 10px 12px; font-size: 12px; }
 .budget-panel h2 { line-height: 1.25; }
 .budget-console { margin-top: 32px; padding: 24px; border: 4px solid var(--ink); border-radius: 8px; background: var(--inset); box-shadow: inset 3px 3px 0 var(--ink); }
 .budget-readout { display: block; width: fit-content; min-width: 170px; margin: 16px auto 32px; padding: 8px 20px; border: var(--border); border-radius: 8px; background: var(--cyan); box-shadow: var(--shadow); font-family: var(--font-mono); font-size: 48px; font-weight: 700; text-align: center; }
@@ -90,6 +97,7 @@
   .machine-glass { height: 138px; }
   .choice-grid { gap: 12px; }
   .choice-chip { padding: 10px; gap: 8px; font-size: 12px; }
+  .category-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .choice-icon { display: none; }
   .constraint-grid { grid-template-columns: 1fr; }
   .constraint-panel { padding: 16px; }

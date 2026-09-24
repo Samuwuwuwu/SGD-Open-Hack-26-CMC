@@ -3,7 +3,7 @@ import test, { after, before } from 'node:test';
 import app from '../src/app.js';
 import { getDemoInventory } from '../src/services/inventoryService.js';
 import { nextQuizQuestion } from '../src/services/quizService.js';
-import { buildDropBundle, findDropCandidates } from '../src/domain/matching.js';
+import { buildDropBundle, filterInventory, findDropCandidates } from '../src/domain/matching.js';
 
 let server;
 let baseUrl;
@@ -32,8 +32,8 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
 
   assert.equal(response.status, 200);
   assert.equal(body.source, 'inventory.xlsx');
-  assert.equal(body.items.length, 30);
-  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 30);
+  assert.equal(body.items.length, 35);
+  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 35);
   assert.equal(typeof body.items[0].retail_price, 'number');
   assert.equal(typeof body.items[0].surplus_price, 'number');
   assert.equal(typeof body.items[0].discount_pct, 'number');
@@ -47,6 +47,7 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
   assert.deepEqual(body.items.find((item) => item.product_name === 'Hyaluronic Acid Serum 50ml').discount_mode, 'protected');
   assert.equal(body.items.find((item) => item.product_name === 'Truffle Sea Salt Mushroom Crisps').show_discount, true);
   assert.deepEqual(body.items.find((item) => item.product_name === 'Herbed Lentil Crisp Kit').allergens, []);
+  assert.ok(body.items.filter((item) => item.condition !== 'new').length >= 4);
   assert.deepEqual(inventory, body.items);
 });
 
@@ -70,10 +71,10 @@ test('POST /api/drops/match builds one budget-safe, varied bundle deterministica
 
 test('matching fills a sparse quiz result with other eligible stock, up to three boxes', () => {
   const inventory = [
-    { sku: 'A', active: true, stock_qty: 1, surplus_price: 20, tags: ['rare'] },
-    { sku: 'B', active: true, stock_qty: 1, surplus_price: 25, tags: ['other'] },
-    { sku: 'C', active: true, stock_qty: 1, surplus_price: 30, tags: ['other'] },
-    { sku: 'D', active: true, stock_qty: 1, surplus_price: 70, tags: ['other'] },
+    { sku: 'A', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, tags: ['rare'] },
+    { sku: 'B', active: true, condition: 'new', stock_qty: 1, surplus_price: 25, tags: ['other'] },
+    { sku: 'C', active: true, condition: 'new', stock_qty: 1, surplus_price: 30, tags: ['other'] },
+    { sku: 'D', active: true, condition: 'new', stock_qty: 1, surplus_price: 70, tags: ['other'] },
   ];
   const candidates = findDropCandidates({ inventory, budget: 50, quizFilters: [['rare']] });
   assert.deepEqual(candidates.map((item) => item.sku), ['A', 'B', 'C']);
@@ -81,14 +82,33 @@ test('matching fills a sparse quiz result with other eligible stock, up to three
 
 test('bundle matching never exceeds the budget while preferring category variety', () => {
   const inventory = [
-    { sku: 'A', active: true, stock_qty: 1, surplus_price: 20, category: 'food', tags: ['rare'] },
-    { sku: 'B', active: true, stock_qty: 1, surplus_price: 20, category: 'food', tags: ['other'] },
-    { sku: 'C', active: true, stock_qty: 1, surplus_price: 20, category: 'home', tags: ['other'] },
-    { sku: 'D', active: true, stock_qty: 1, surplus_price: 20, category: 'tech', tags: ['other'] },
+    { sku: 'A', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'food', tags: ['rare'] },
+    { sku: 'B', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'food', tags: ['other'] },
+    { sku: 'C', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'home', tags: ['other'] },
+    { sku: 'D', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'tech', tags: ['other'] },
   ];
   const bundle = buildDropBundle({ inventory, budget: 60, quizFilters: [['rare']] });
   assert.deepEqual(bundle.map((item) => item.sku), ['A', 'C', 'D']);
   assert.ok(bundle.reduce((total, item) => total + item.surplus_price, 0) <= 60);
+});
+
+test('category and condition controls are hard inventory constraints', () => {
+  const inventory = getDemoInventory();
+  const newOnly = filterInventory({
+    inventory,
+    budget: 150,
+    constraints: { categories: ['electronics'], conditionMode: 'new_only' },
+  });
+  const withPreLoved = filterInventory({
+    inventory,
+    budget: 150,
+    constraints: { categories: ['electronics'], conditionMode: 'allow_preloved' },
+  });
+
+  assert.ok(newOnly.length > 0);
+  assert.ok(newOnly.every((item) => item.category === 'electronics' && item.condition === 'new'));
+  assert.ok(withPreLoved.some((item) => item.condition === 'preloved_like_new'));
+  assert.ok(withPreLoved.every((item) => item.category === 'electronics'));
 });
 
 test('quiz requests strict structured output and keeps inventory tag validation', async () => {

@@ -78,7 +78,7 @@ function normalizeRow(row) {
     tags: pipeList(row.tags),
     dietary,
     allergens: allergens(row.allergens),
-    condition: text(row.condition),
+    condition: text(row.condition) || 'new',
     active: boolean(row.active),
   };
 }

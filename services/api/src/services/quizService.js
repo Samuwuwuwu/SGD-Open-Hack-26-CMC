@@ -113,7 +113,7 @@ function normalizeQuestion(raw, allowedTags, remainingCount) {
   };
 }
 
-async function askCerebras({ topic, tags, questionCount, quizHistory }) {
+async function askCerebras({ topic, tags, questionCount, quizHistory, recipientMode }) {
   const apiKey = process.env.CEREBRAS_API_KEY;
   if (!apiKey) throw new Error('CEREBRAS_API_KEY is not configured.');
 
@@ -123,6 +123,9 @@ async function askCerebras({ topic, tags, questionCount, quizHistory }) {
   const styleHint = QUESTION_STYLES[questionCount % QUESTION_STYLES.length];
   const historyText = formatQuizHistory(quizHistory);
   const normalizedTopic = topic.toLowerCase();
+  const recipientHint = recipientMode === 'gift'
+    ? 'The quiz is for someone else. Address the recipient indirectly with they/them language and describe their vibe, choices, or reactions. Do not mention gifting or shopping.'
+    : 'The quiz is for the person answering. Address them naturally with you/your language.';
   const topicHint = normalizedTopic === 'random'
     ? 'Random means the subject and scenario should change dramatically between questions. Do not create a recurring Random universe. Each question should feel unrelated to the previous one.'
     : `Use ${topic} as the theme naturally. For named fandoms, vary characters, locations, and events; do not reuse a previous scenario, character, or motif.`;
@@ -180,6 +183,7 @@ async function askCerebras({ topic, tags, questionCount, quizHistory }) {
 This is question ${questionCount + 1}. It is not trivia or a shopping survey. Make it feel like a funny internet quiz: specific, playful and easy to answer.
 
 ${topicHint}
+${recipientHint}
 Allowed question styles: ${QUESTION_STYLES.join(', ')}.
 Prefer this style this turn: ${styleHint}.
 Prefer a question style not used in the previous two questions.
@@ -258,6 +262,7 @@ export async function nextQuizQuestion(payload = {}) {
       tags,
       questionCount: quizFilters.length,
       quizHistory: Array.isArray(payload.quizHistory) ? payload.quizHistory : [],
+      recipientMode: payload.recipientMode === 'gift' ? 'gift' : 'self',
     });
     return normalizeQuestion(raw, allowedTags, remaining.length) || fallbackQuestion(tags, remaining.length, questionCount);
   } catch (error) {
