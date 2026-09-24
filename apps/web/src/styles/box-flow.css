@@ -214,6 +214,7 @@
 .pull-completion:empty { min-height: 0; margin-top: 0; }
 .pulls-complete .pull-completion { border: 2px solid var(--ink); background: var(--box-accent); }
 .item-pulls .drop-screen-actions { margin-top: 12px; }
+.share-haul-status { margin: 8px 0 0; color: var(--ink); font: 10px/1.45 var(--font-mono); text-align: right; }
 @keyframes item-pop { 0% { opacity: 0; transform: scale(.1) rotate(-30deg); } 35% { opacity: 1; transform: scale(1.7) rotate(10deg); } 100% { opacity: 0; transform: translateY(-24px) scale(.7) rotate(45deg); } }
 
 /* The receipt is deliberately calm after the animated discovery. */
