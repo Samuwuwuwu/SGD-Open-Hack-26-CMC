@@ -18,6 +18,45 @@ function ProductArt({ category }) {
             <circle cx="80" cy="72" r="23" fill="var(--accent-yellow)" />
             <path d="M67 73 77 82 94 62" />
           </>
+        ) : category === 'cosmetics' ? (
+          <>
+            <path d="M37 51H84V117H37Z" fill="var(--surface)" />
+            <path d="M44 32H77V51H44Z" fill="var(--orange)" />
+            <path d="M49 21H71V32H49Z" fill="var(--surface)" />
+            <path d="M48 76H73M48 85H65" />
+            <path d="M100 63H126V117H100Z" fill="var(--magenta)" />
+            <path d="M104 41 122 33V63H104Z" fill="var(--surface)" />
+            <path d="M100 96H126" />
+          </>
+        ) : category === 'electronics' ? (
+          <>
+            <rect x="33" y="21" width="64" height="98" rx="10" fill="var(--surface)" />
+            <path d="M55 34H75M56 106H74M68 48 51 73H67L61 91 82 64H66Z" fill="var(--lime)" />
+            <path d="M111 49H129V78H111ZM120 78V100C120 113 102 114 102 103" fill="var(--cyan)" />
+            <path d="M115 40V49M125 40V49" />
+          </>
+        ) : category === 'stationery' ? (
+          <>
+            <path d="M38 22H111V119H38Z" fill="var(--surface)" />
+            <path d="M47 22V119M62 45H95M62 57H95M62 69H83" />
+            <path d="M82 22V39L91 34 100 39V22" fill="var(--orange)" />
+            <path d="m114 110 12-9V40H114ZM114 40V32H126V40" fill="var(--lime)" />
+            <path d="M31 38H43M31 60H43M31 82H43M31 104H43" />
+          </>
+        ) : category === 'home goods' ? (
+          <>
+            <path d="M31 58H98V103C98 127 31 127 31 103Z" fill="var(--surface)" />
+            <path d="M98 66H110C134 66 134 99 110 99H98" />
+            <path d="M47 21C67 32 31 39 51 50M70 17C90 28 54 35 74 46" />
+            <path d="M37 77H91M28 125H112" />
+            <circle cx="64" cy="94" r="9" fill="var(--lime)" />
+          </>
+        ) : category === 'lifestyle' ? (
+          <>
+            <path d="M44 80H116L108 122H52Z" fill="var(--surface)" />
+            <path d="M80 80V37M80 65C52 65 41 49 47 31 72 31 84 47 80 65ZM80 52C80 30 95 19 117 23 116 43 103 54 80 52Z" fill="var(--lime)" />
+            <path d="M43 91H117M75 105H85" />
+          </>
         ) : (
           <>
             <path d="M37 41 80 20 123 41V104L80 127 37 104Z" fill="var(--bg-card)" />

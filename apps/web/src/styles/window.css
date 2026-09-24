@@ -44,7 +44,7 @@
   --sidebar-padding: 26px 20px;
   --brand-size: 52px;
   --brand-symbol-font-size: 44px;
-  --brand-margin: 34px;
+  --brand-margin: 22px;
   --rail-gap: 10px;
   --rail-step-min-height: 54px;
   --rail-step-font-size: 15px;
@@ -122,6 +122,7 @@
 .brand-lockup .rail-label { font-size: 10px; }
 .progress-rail .rail-label { margin-bottom: 16px; }
 .progress-rail ol { display: grid; gap: var(--rail-gap); padding: 0; margin: 0; list-style: none; }
+.shell--landing .progress-rail { margin-bottom: 12px; }
 .rail-step {
   display: flex;
   align-items: center;
@@ -186,6 +187,7 @@
 .shell--landing .welcome-composition { grid-template-columns: 1.1fr 1fr; gap: clamp(40px, 7vw, 96px); min-width: 0; min-height: 580px; }
 .shell--landing .welcome-copy { min-width: 0; }
 .shell--landing .welcome-copy h2 { font-size: clamp(54px, 6vw, 76px); line-height: 1.04; }
+.shell--landing .welcome-heading-line { white-space: nowrap; }
 .shell--landing .welcome-copy .highlight-word { white-space: nowrap; }
 .shell--landing .welcome-copy .panel-copy { max-width: 540px; font-size: 18px; }
 .shell--landing .welcome-copy .primary-button { min-height: 60px; min-width: 240px; font-size: 15px; }
@@ -253,6 +255,7 @@
   .viewport-actions > .button-hitbox { flex: 1 1 auto; }
   .shell--landing .welcome-composition { grid-template-columns: minmax(0, 1fr); gap: 24px; min-height: 0; }
   .shell--landing .welcome-copy h2 { font-size: 48px; }
+  .shell--landing .welcome-heading-line { font-size: clamp(36px, 11vw, 48px); }
   .shell--landing .welcome-copy .highlight-word { font-size: clamp(38px, 12vw, 48px); }
   .shell--landing .welcome-copy .panel-copy { font-size: 16px; }
   .shell--landing .welcome-copy .primary-button { min-height: 52px; min-width: 208px; font-size: 13px; }
