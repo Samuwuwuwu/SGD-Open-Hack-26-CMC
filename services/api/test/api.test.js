@@ -32,8 +32,9 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
 
   assert.equal(response.status, 200);
   assert.equal(body.source, 'inventory.xlsx');
-  assert.equal(body.items.length, 35);
-  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 35);
+  assert.equal(body.items.length, 63);
+  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 63);
+  assert.equal(body.items.filter((item) => item.provider === 'Demo Warehouse (synthetic)').length, 28);
   assert.equal(typeof body.items[0].retail_price, 'number');
   assert.equal(typeof body.items[0].surplus_price, 'number');
   assert.equal(typeof body.items[0].discount_pct, 'number');
@@ -188,7 +189,7 @@ test('quiz requires four questions and caps the journey at five', async () => {
 
   try {
     const afterThree = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['shareable'], ['shareable'], ['shareable']] });
-    const earlyAfterFour = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['fashion'], ['fashion'], ['fashion'], ['fashion']] });
+    const earlyAfterFour = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['rave'], ['rave'], ['rave'], ['rave']] });
     const afterFive = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['shareable'], ['shareable'], ['shareable'], ['shareable'], ['shareable']] });
 
     assert.equal(afterThree.done, false);

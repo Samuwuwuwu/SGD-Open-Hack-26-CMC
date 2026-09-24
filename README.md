@@ -2,7 +2,9 @@
 
 ROLLOVER is a prototype for SDG Open Hack 2026, Challenge 2 / SDG 12. It explores a circular-retail flow where retail partners expose synthetic surplus inventory and customers move through a short preference experience that produces several explainable drop candidates before anything is fulfilled.
 
-This repository is intentionally small and demo-first. The current golden path is: budget → quiz → compare sealed boxes → box opening → individual item reveals → expandable haul summary.
+This repository is intentionally small and demo-first. The current golden path is: recipient → budget → category → quiz → compare sealed boxes → box opening → individual item reveals → expandable haul summary.
+
+The committed workbook includes 28 additional fictional warehouse products labeled `Demo Warehouse (synthetic)` for a wider demo matching pool.
 
 Matching offers up to four distinct bundles within the budget, with item counts, category mixes, colours, and relevant material clues. Show at most three boxes side by side on desktop; the box scroller reveals the others. Opening a box returns its predetermined inventory items; the client animates the opening and lets customers reveal each card or reveal all. Opened boxes and saved demo picks persist while the app stays open. There is no payment, inventory reservation, or fulfilment.
 

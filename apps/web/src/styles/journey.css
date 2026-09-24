@@ -79,6 +79,30 @@
 .constraint-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .constraint-grid label { display: grid; gap: 8px; font-size: 13px; }
 .constraint-grid select { width: 100%; min-width: 0; min-height: 48px; padding: 10px; border: var(--border); border-radius: 8px; background: var(--surface); box-shadow: inset 3px 3px 0 var(--ink); font-family: var(--font-mono); font-size: 12px; }
+@media (min-width: 768px) {
+  .main-viewport.is-category { display: flex; flex-direction: column; padding: clamp(14px, 2svh, 24px); }
+  .is-category .budget-panel { width: 100%; max-width: 900px; margin: 0 auto; }
+  .is-category .budget-panel h2 { margin-bottom: 4px; font-size: clamp(38px, 4vw, 56px); line-height: 1.1; }
+  .is-category .budget-panel .panel-copy { max-width: none; margin-bottom: 8px; font-size: 15px; }
+  .is-category .range-controls { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 12px; }
+  .is-category .range-control-block { gap: 7px; min-width: 0; }
+  .is-category .category-choice-grid { gap: 10px; }
+  .is-category .range-choice-grid .choice-chip { min-height: 48px; padding: 9px 10px; }
+  .is-category .constraint-panel { min-width: 0; padding: 16px; }
+  .is-category .constraint-panel > .rail-label { margin-bottom: 7px; }
+  .is-category .constraint-grid { gap: 10px; }
+  .is-category .constraint-grid label { gap: 4px; font-size: 12px; }
+  .is-category .constraint-grid select { min-height: 42px; padding: 7px; font-size: 11px; }
+  .is-category .viewport-actions { position: static; flex: 0 0 auto; align-self: stretch; margin: auto 0 0; padding-top: 14px; }
+}
+@media (min-width: 768px) and (max-height: 760px) {
+  .is-category .range-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+  .is-category .range-control-block:first-child { grid-column: 1 / -1; }
+  .is-category .range-control-block:nth-child(2) .range-choice-grid { grid-template-columns: 1fr; gap: 7px; }
+  .is-category .category-choice-grid { gap: 7px; }
+  .is-category .range-choice-grid .choice-chip { min-height: 40px; padding-block: 6px; }
+  .is-category .constraint-panel { padding: 10px; }
+}
 .matching-panel { text-align: center; padding: 16px 0; }
 .matching-panel .panel-copy { margin-inline: auto; }
 .radar-screen { display: grid; place-items: center; max-width: 420px; height: 260px; margin: 0 auto 32px; border: 4px solid var(--ink); border-radius: 12px; background: var(--inset); box-shadow: inset 4px 4px 0 var(--ink); }

@@ -5,7 +5,45 @@ import { buildBoxCandidates } from '../domain/matching.js';
 const tags = (value) => Array.isArray(value) ? [...new Set(value.filter((tag) => typeof tag === 'string'))] : [];
 const readable = (value = '') => value.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 const unique = (values) => [...new Set(values.filter(Boolean))];
-const category = (item) => item.category === 'fashion' ? (item.subcategory === 'accessories' ? 'Accessories' : 'Clothing') : readable(item.category);
+const lifestyleLabels = {
+  gardening: 'Garden kits',
+  travel: 'Travel gear',
+  wellness: 'Wellness',
+  hydration: 'Drinkware',
+  outdoors: 'Outdoor gear',
+  hobbies: 'Hobby kits',
+};
+const category = (item) => {
+  if (item.category === 'fashion') {
+    if (item.subcategory === 'accessories') return 'Fashion accessories';
+    if (['shoes', 'footwear'].includes(item.subcategory)) return 'Shoes';
+    return 'Clothing';
+  }
+  if (item.category === 'lifestyle') return lifestyleLabels[item.subcategory] || 'Everyday goods';
+  return readable(item.category);
+};
+const itemTypeHint = (item) => {
+  if (item.category === 'fashion') {
+    if (item.subcategory === 'bottoms') {
+      const name = item.product_name.toLowerCase();
+      if (name.includes('skirt')) return 'Skirts';
+      if (name.includes('trouser')) return 'Trousers';
+      if (name.includes('pant')) return 'Pants';
+    }
+    const fashionTypes = { tops: 'Tops', outerwear: 'Outerwear', knitwear: 'Knitwear', costume: 'Costumes', accessories: 'Accessories', dresses: 'Dresses', shoes: 'Shoes', footwear: 'Shoes' };
+    return fashionTypes[item.subcategory] || 'Clothing';
+  }
+  if (item.category === 'lifestyle') return category(item);
+  return readable(item.subcategory || item.category);
+};
+const colourClues = (items, field) => {
+  const counts = new Map();
+  for (const item of items) {
+    const colour = readable(item[field]);
+    if (colour) counts.set(colour, (counts.get(colour) || 0) + 1);
+  }
+  return [...counts].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([colour]) => colour);
+};
 
 function matchingInput(payload) {
   return {
@@ -40,9 +78,11 @@ function offers(payload) {
       preview: {
         id, theme: box.theme, label: box.label, itemCount: items.length, total: box.total, budget: input.budget,
         categories,
-        primaryColours: unique(items.map((item) => readable(item.primary_colour))),
+        itemTypeHints: unique([...items].sort((a, b) => Number(b.category === 'fashion') - Number(a.category === 'fashion')).map(itemTypeHint)).slice(0, 3),
+        primaryColours: colourClues(items, 'primary_colour'),
         secondaryColours: unique(items.map((item) => readable(item.secondary_colour))),
         materials: unique(items.filter((item) => item.category === 'fashion').map((item) => item.materials)),
+        itemTeasers: unique(items.map((item) => item.mystery_teaser)).slice(0, 2),
         matchReasons: matchedTags.slice(0, 3).map(readable), nearbyCount,
         teaser: matchedTags.length ? `A little ${matchedTags.slice(0, 2).map((tag) => tag.replaceAll('_', ' ')).join(', a little ')}.` : 'A fresh combination from the surplus shelf.',
       },
