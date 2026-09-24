@@ -1,7 +1,9 @@
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
 async function request(path, options) {
   let response;
   try {
-    response = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
+    response = await fetch(`${API_BASE_URL}${path}`, { headers: { 'Content-Type': 'application/json' }, ...options });
   } catch {
     throw new Error('The demo API is temporarily unavailable. Please try again.');
   }
