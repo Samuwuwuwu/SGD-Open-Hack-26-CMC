@@ -120,13 +120,6 @@ function App() {
     });
   };
 
-  const selectedCategories = constraints.categories || [];
-  const selectedCategoryLabels = categoryOptions
-    .filter(([value]) => selectedCategories.includes(value))
-    .map(([, label]) => label);
-  const showSizeControl = selectedCategories.length === 0 || selectedCategories.includes('fashion');
-  const showDietaryControl = selectedCategories.length === 0 || selectedCategories.includes('food');
-
   const resetQuiz = () => {
     setQuizTopic('');
     setQuizFilters([]);
@@ -197,10 +190,10 @@ function App() {
                 </section>
               )}
               {stage === 3 && (
-                <section className="journey-panel shape-mix-panel">
+                <section className="journey-panel budget-panel">
                   <p className="quiz-kicker">STEP THREE</p>
                   <h2>Shape the <span className="highlight-word">mix.</span></h2>
-                  <p className="panel-copy">{selectedCategories.length > 0 ? `Showing ${selectedCategoryLabels.join(' · ')}. Choose any details that matter.` : 'Choose what can show up, then let the quiz do the softer matching.'}</p>
+                  <p className="panel-copy">Choose what can show up, then let the quiz do the softer matching.</p>
                   <div className="range-controls">
 
                     <div className="range-control-block">
@@ -229,24 +222,23 @@ function App() {
                       </div>
                     </div>
 
-                    {(showSizeControl || showDietaryControl) && <div className="constraint-panel">
-                      <p className="rail-label">{[showSizeControl && 'SIZE', showDietaryControl && 'FOOD PREFERENCE'].filter(Boolean).join(' · ')} IF RELEVANT</p>
-                      <div className={`constraint-grid ${!showSizeControl || !showDietaryControl ? 'single-constraint' : ''}`}>
-                        {showSizeControl && <label>
+                    <div className="constraint-panel">
+                      <p className="rail-label">SIZE IF RELEVANT · FOOD PREFERENCE</p>
+                      <div className="constraint-grid">
+                        <label>
                           Size, if relevant
                           <select value={constraints.size} onChange={(event) => setConstraints((current) => ({ ...current, size: event.target.value }))}>
                             <option value="any">Any size</option><option value="S">Small</option><option value="M">Medium</option><option value="L">Large</option>
                           </select>
-                        </label>}
-                        {showDietaryControl && <label>
+                        </label>
+                        <label>
                           Food preference, if relevant
                           <select value={constraints.dietary} onChange={(event) => setConstraints((current) => ({ ...current, dietary: event.target.value }))}>
                             <option value="any">No restriction</option><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option>
                           </select>
-                        </label>}
+                        </label>
                       </div>
-                    </div>}
-                    {!showSizeControl && !showDietaryControl && <p className="constraint-hint">No extra details needed for this category mix.</p>}
+                    </div>
                   </div>
                 </section>
               )}
