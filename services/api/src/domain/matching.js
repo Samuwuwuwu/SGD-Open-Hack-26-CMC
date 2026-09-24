@@ -14,11 +14,14 @@ function satisfiesConstraints(item, constraints = {}) {
 
   const requestedSize = constraints.size;
   const itemSizes = item.sizes || [];
-  if (requestedSize && requestedSize !== 'any' && itemSizes.length > 0 && !itemSizes.includes(requestedSize)) return false;
+  const needsSize = item.category === 'fashion' && item.subcategory !== 'accessories';
+  if (requestedSize && requestedSize !== 'any' && (needsSize || itemSizes.length > 0)
+    && !itemSizes.includes(requestedSize) && !itemSizes.includes('ONE_SIZE')) return false;
 
   const requestedDiet = constraints.dietary;
   const itemDiets = item.dietary || [];
-  if (requestedDiet && requestedDiet !== 'any' && itemDiets.length > 0 && !itemDiets.includes(requestedDiet)) return false;
+  if (requestedDiet && requestedDiet !== 'any' && item.category === 'food'
+    && !itemDiets.includes(requestedDiet) && !(requestedDiet === 'vegetarian' && itemDiets.includes('vegan'))) return false;
 
   const excludedAllergens = constraints.excludedAllergens || [];
   return !includesAny(item.allergens || [], excludedAllergens);
@@ -36,6 +39,7 @@ export function filterInventory({ inventory, budget, constraints = {}, quizFilte
     (item) =>
       item.active &&
       item.stock_qty > 0 &&
+      Number.isFinite(item.surplus_price) && item.surplus_price > 0 &&
       item.surplus_price <= numericBudget &&
       satisfiesConstraints(item, constraints) &&
       matchesQuizFilters(item, quizFilters),
@@ -43,61 +47,73 @@ export function filterInventory({ inventory, budget, constraints = {}, quizFilte
 }
 
 function scoreItem(item, preferences = []) {
-  return preferences.filter((preference) => item.tags.includes(preference)).length * 10 + (item.stock_qty > 1 ? 1 : 0);
+  return preferences.filter((preference) => (item.tags || []).includes(preference)).length * 10;
 }
 
-export function findDropCandidates({ inventory, budget, preferences = [], constraints = {}, quizFilters = [] }) {
-  const ranked = (filters) => filterInventory({ inventory, budget, constraints, quizFilters: filters })
-    .map((item) => ({ ...item, matchScore: scoreItem(item, preferences) }))
-    .sort((left, right) => right.matchScore - left.matchScore || left.surplus_price - right.surplus_price || left.sku.localeCompare(right.sku));
+const boxProfiles = [
+  { theme: 'little', label: 'Little lift', fraction: 0.45, maxItems: 2 },
+  { theme: 'remix', label: 'The remix', fraction: 0.68, maxItems: 4 },
+  { theme: 'wild', label: 'Wild card', fraction: 0.85, maxItems: 6 },
+  { theme: 'full', label: 'Full rotation', fraction: 1, maxItems: 8 },
+];
+const cents = (value) => Math.round(value * 100);
+const totalCents = (items) => items.reduce((sum, item) => sum + cents(item.surplus_price), 0);
+const signature = (items) => items.map((item) => item.sku).sort().join('|');
 
-  const exact = ranked(quizFilters).slice(0, 5);
-  if (exact.length >= 3) return exact;
-
-  const chosen = new Set(exact.map((item) => item.sku));
-  const nearby = ranked([]).filter((item) => !chosen.has(item.sku)).slice(0, 3 - exact.length);
-  return [...exact, ...nearby];
+// Try every affordable anchor, then add relevant, varied items. The demo's
+// small inventory does not need a combinatorial search or a solver.
+function bundleOptions(pool, cap, maxItems, usedSkus) {
+  const eligible = pool.filter((item) => cents(item.surplus_price) <= cap);
+  const options = new Map();
+  for (const anchor of eligible) {
+    const items = [anchor];
+    options.set(signature(items), [...items]);
+    while (items.length < maxItems) {
+      const remaining = cap - totalCents(items);
+      const categories = new Set(items.map((item) => item.category));
+      const rank = (item) => item.matchScore + (categories.has(item.category) ? 0 : 6) - (usedSkus.has(item.sku) ? 8 : 0);
+      const next = eligible.filter((item) => !items.includes(item) && cents(item.surplus_price) <= remaining)
+        .sort((a, b) => rank(b) - rank(a) || a.surplus_price - b.surplus_price || a.sku.localeCompare(b.sku))[0];
+      if (!next) break;
+      items.push(next);
+      options.set(signature(items), [...items]);
+    }
+  }
+  return [...options.values()];
 }
 
-function rankBundlePool({ inventory, budget, preferences = [], constraints = {}, quizFilters = [] }) {
-  const strict = filterInventory({ inventory, budget, constraints, quizFilters });
-  const fallback = filterInventory({ inventory, budget, constraints, quizFilters: [] })
-    .filter((item) => !strict.some((strictItem) => strictItem.sku === item.sku));
-
-  return [...strict, ...fallback].map((item) => ({
-    ...item,
-    matchScore: scoreItem(item, preferences) + (strict.some((strictItem) => strictItem.sku === item.sku) ? 4 : 0),
-  }));
-}
-
-export function buildDropBundle({ inventory, budget, preferences = [], constraints = {}, quizFilters = [] }) {
+export function buildBoxCandidates({ inventory, budget, preferences = [], constraints = {}, quizFilters = [] }) {
   const numericBudget = Number(budget);
   if (!Number.isFinite(numericBudget) || numericBudget <= 0) return [];
-
-  const pool = rankBundlePool({ inventory, budget: numericBudget, preferences, constraints, quizFilters });
+  const pool = filterInventory({ inventory, budget: numericBudget, constraints }).map((item) => ({
+    ...item,
+    matchScore: scoreItem(item, preferences) + (quizFilters.length && matchesQuizFilters(item, quizFilters) ? 12 : 0),
+  }));
+  if (!pool.length) return [];
   const selected = [];
-  const selectedSkus = new Set();
-  const selectedCategories = new Set();
-
-  while (selected.length < 8) {
-    const remaining = numericBudget - selected.reduce((total, item) => total + item.surplus_price, 0);
-    const affordable = pool
-      .filter((item) => !selectedSkus.has(item.sku) && item.surplus_price <= remaining)
-      .sort((left, right) => {
-        const leftVariety = selectedCategories.has(left.category) ? 0 : 1;
-        const rightVariety = selectedCategories.has(right.category) ? 0 : 1;
-        return rightVariety - leftVariety
-          || right.matchScore - left.matchScore
-          || left.surplus_price - right.surplus_price
-          || left.sku.localeCompare(right.sku);
-      });
-
-    const next = affordable[0];
-    if (!next) break;
-    selected.push(next);
-    selectedSkus.add(next.sku);
-    selectedCategories.add(next.category);
+  const usedSkus = new Set();
+  const cheapest = Math.min(...pool.map((item) => cents(item.surplus_price)));
+  for (const profile of boxProfiles) {
+    const cap = Math.max(cheapest, Math.floor(cents(numericBudget) * profile.fraction));
+    const fresh = (items) => !selected.some((box) => signature(box.items) === signature(items));
+    let options = bundleOptions(pool, cap, profile.maxItems, usedSkus).filter(fresh);
+    if (!options.length) options = bundleOptions(pool, cents(numericBudget), profile.maxItems, usedSkus).filter(fresh);
+    if (!options.length) continue;
+    if (options.some((items) => items.some((item) => item.matchScore > 0))) {
+      options = options.filter((items) => items.some((item) => item.matchScore > 0));
+    }
+    const score = (items) => {
+      const overlap = items.filter((item) => usedSkus.has(item.sku)).length / items.length;
+      const sameCount = selected.some((box) => box.items.length === items.length);
+      const samePrice = selected.some((box) => Math.abs(totalCents(box.items) - totalCents(items)) < 200);
+      return items.reduce((sum, item) => sum + item.matchScore, 0) / Math.sqrt(items.length)
+        + items.length * 5 + new Set(items.map((item) => item.category)).size * 3
+        + totalCents(items) / cap * 4 - overlap * 20 - (sameCount ? 8 : 0) - (samePrice ? 4 : 0);
+    };
+    options.sort((a, b) => score(b) - score(a) || totalCents(a) - totalCents(b) || signature(a).localeCompare(signature(b)));
+    const items = options[0];
+    items.forEach((item) => usedSkus.add(item.sku));
+    selected.push({ ...profile, items, total: totalCents(items) / 100 });
   }
-
-  return selected;
+  return selected.sort((a, b) => a.total - b.total);
 }

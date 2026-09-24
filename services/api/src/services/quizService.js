@@ -234,6 +234,11 @@ Return one question object using the response format.`,
 export async function nextQuizQuestion(payload = {}) {
   const quizFilters = Array.isArray(payload.quizFilters) ? payload.quizFilters : [];
   const questionCount = quizFilters.length;
+  const eligible = filterInventory({
+    inventory,
+    budget: payload.budget,
+    constraints: payload.constraints || {},
+  });
   const remaining = filterInventory({
     inventory,
     budget: payload.budget,
@@ -242,16 +247,16 @@ export async function nextQuizQuestion(payload = {}) {
   });
 
   if (remaining.length === 0) {
-    return { done: true, source: 'inventory', remainingCount: 0 };
+    return { done: true, source: 'inventory', remainingCount: 0, availableCount: eligible.length };
   }
 
   if (questionCount >= 5 || (questionCount >= 4 && remaining.length <= 8)) {
-    return { done: true, source: 'inventory', remainingCount: remaining.length };
+    return { done: true, source: 'inventory', remainingCount: remaining.length, availableCount: eligible.length };
   }
 
   const tags = tagCounts(remaining).filter(([, count]) => count > 0).slice(0, 18);
   if (tags.length < 4) {
-    return fallbackQuestion(tags, remaining.length, questionCount);
+    return { ...fallbackQuestion(tags, remaining.length, questionCount), availableCount: eligible.length };
   }
 
   const allowedTags = new Set(tags.map(([tag]) => tag));
@@ -264,9 +269,9 @@ export async function nextQuizQuestion(payload = {}) {
       quizHistory: Array.isArray(payload.quizHistory) ? payload.quizHistory : [],
       recipientMode: payload.recipientMode === 'gift' ? 'gift' : 'self',
     });
-    return normalizeQuestion(raw, allowedTags, remaining.length) || fallbackQuestion(tags, remaining.length, questionCount);
+    return { ...(normalizeQuestion(raw, allowedTags, remaining.length) || fallbackQuestion(tags, remaining.length, questionCount)), availableCount: eligible.length };
   } catch (error) {
     console.warn('[quiz] Cerebras unavailable, using fallback:', error.message);
-    return fallbackQuestion(tags, remaining.length, questionCount);
+    return { ...fallbackQuestion(tags, remaining.length, questionCount), availableCount: eligible.length };
   }
 }

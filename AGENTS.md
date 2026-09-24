@@ -5,7 +5,7 @@ ROLLOVER is a JavaScript React/Vite + Node/Express prototype for SDG Open Hack 2
 The current golden path is:
 
 ```text
-budget -> explicit preferences -> matching -> one bundle -> multi-pull reveal -> keep/remove -> claim drop
+budget -> explicit preferences -> matching -> choose a box -> box opening -> item pulls -> expandable haul summary
 ```
 
 ## Prototype-first
@@ -23,10 +23,11 @@ Optimize for the shortest correct path to a reliable demo. Keep the concept easy
 
 ## Drop flow
 
-- A Drop is one personalized bundle, not one product or one mystery box.
-- `/api/drops/match` should return one budget-safe `drop` with its selected items and total.
-- The client owns reveal animation and keep/remove selection; do not reintroduce candidate, selected-box, or single-product reveal state.
-- Use `ROLL`, `DROP`, `REVEAL`, `KEEP`, `REMOVE`, and `CLAIM DROP` consistently. Avoid choose-box, choose-drop, confirm-drop, and reveal-candidate language.
+- Offer up to four distinct boxes, each containing a personalized bundle with a truthful price, count, categories, colour clues, and relevant materials. Show at most three side by side on desktop; use the themed box scroller for overflow.
+- `/api/drops/match` returns sealed `candidates`; exact products are returned by `/api/drops/reveal` after selecting a box. Both use the same deterministic server matching.
+- Box opening, individual item pulls, and the expandable haul summary are distinct views. Animation never changes the inventory result.
+- Preserve opened boxes and item reveal progress during the session. Budget or preference changes invalidate previous offers.
+- Use fewer offers when inventory is sparse; never duplicate a bundle just to fill the page.
 
 ## Product facts and AI
 
@@ -40,7 +41,9 @@ Inventory facts such as stock, price, size, dietary information, and availabilit
 
 ## Handoff
 
-Before handoff, run the repository validation command and any relevant live smoke checks. Final notes should include a concise summary, changed files, exact checks run, known limitations, and exactly one proposed Conventional Commit message:
+Project preference from the user: do not use MCP tools or run automated/browser checks unless explicitly requested. The user handles checks because the project is under time pressure. Keep relevant tests current and report which checks were left to the user. Terminal reads and implementation work are allowed.
+
+Final notes should include a concise summary, changed files, checks run or skipped, known limitations, and exactly one proposed Conventional Commit message:
 
 ```text
 <type>(<scope>): <concise summary>

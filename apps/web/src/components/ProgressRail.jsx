@@ -1,7 +1,7 @@
 import IconGlyph from './IconGlyph.jsx';
 import ButtonLift from './ButtonLift.jsx';
 
-function ProgressRail({ stages, currentStage, onNavigate, isMatching }) {
+function ProgressRail({ stages, currentStage, availableStages = [], onNavigate, isMatching }) {
   return (
     <aside className="journey-sidebar">
       <a className="brand-lockup" href="#main-viewport" aria-label="ROLLOVER, jump to content">
@@ -20,7 +20,7 @@ function ProgressRail({ stages, currentStage, onNavigate, isMatching }) {
                     className={`rail-step ${step === currentStage ? 'active' : ''} ${complete ? 'complete' : ''}`}
                     type="button"
                     aria-current={step === currentStage ? 'step' : undefined}
-                    disabled={isMatching || step === 3 || step >= currentStage}
+                    disabled={isMatching || step === currentStage || !availableStages.includes(step)}
                     onClick={() => onNavigate(step)}
                   >
                     <span className="rail-number">{String(step).padStart(2, '0')}</span>

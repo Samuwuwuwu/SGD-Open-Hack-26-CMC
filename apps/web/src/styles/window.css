@@ -44,7 +44,7 @@
   --sidebar-padding: 26px 20px;
   --brand-size: 52px;
   --brand-symbol-font-size: 44px;
-  --brand-margin: 34px;
+  --brand-margin: 22px;
   --rail-gap: 10px;
   --rail-step-min-height: 54px;
   --rail-step-font-size: 15px;
@@ -122,6 +122,7 @@
 .brand-lockup .rail-label { font-size: 10px; }
 .progress-rail .rail-label { margin-bottom: 16px; }
 .progress-rail ol { display: grid; gap: var(--rail-gap); padding: 0; margin: 0; list-style: none; }
+.shell--landing .progress-rail { margin-bottom: 12px; }
 .rail-step {
   display: flex;
   align-items: center;
@@ -186,6 +187,7 @@
 .shell--landing .welcome-composition { grid-template-columns: 1.1fr 1fr; gap: clamp(40px, 7vw, 96px); min-width: 0; min-height: 580px; }
 .shell--landing .welcome-copy { min-width: 0; }
 .shell--landing .welcome-copy h2 { font-size: clamp(54px, 6vw, 76px); line-height: 1.04; }
+.shell--landing .welcome-heading-line { white-space: nowrap; }
 .shell--landing .welcome-copy .highlight-word { white-space: nowrap; }
 .shell--landing .welcome-copy .panel-copy { max-width: 540px; font-size: 18px; }
 .shell--landing .welcome-copy .primary-button { min-height: 60px; min-width: 240px; font-size: 15px; }
@@ -196,7 +198,28 @@
 
 @media (min-width: 1200px) {
   .window-interior { grid-template-rows: minmax(0, 1fr); }
-  .journey-sidebar { min-height: 0; overflow-y: auto; }
+  .shell--landing, .shell--experience {
+    --sidebar-padding: 12px 14px;
+    --brand-margin: clamp(8px, 1.7svh, 18px);
+    --rail-gap: clamp(5px, 1.2svh, 15px);
+    --rail-step-min-height: clamp(34px, 4.5svh, 56px);
+    --rail-step-font-size: 13px;
+  }
+  .journey-sidebar { min-height: 0; overflow: hidden; }
+  .progress-rail { display: flex; flex: 1; min-height: 0; }
+  .shell--experience .progress-rail { margin-bottom: 16px; }
+  .progress-rail ol { flex: 1; grid-template-rows: repeat(7, minmax(0, 1fr)); width: 100%; }
+  .progress-rail li { display: flex; align-items: center; min-height: 0; }
+  .progress-rail li .button-hitbox { width: 100%; height: min(100%, 68px); }
+  .brand-symbol { margin-bottom: 7px; }
+  .brand-lockup h1 { margin-bottom: 2px; font-size: 25px; }
+  .rail-step { gap: 7px; height: 100%; padding: 4px 9px; }
+  .rail-step.active { padding: 3px 8px; }
+  .rail-number { width: 24px; height: 24px; font-size: 10px; }
+  .sidebar-gacha { margin-top: 0; padding: 7px; }
+  .sidebar-gacha-label { margin-bottom: 5px; }
+  .sidebar-capsule-tray { min-height: 50px; padding: 4px; }
+  .sidebar-capsule, .shell--experience .sidebar-capsule { width: 30px; height: 30px; }
 }
 
 @media (min-width: 1200px) and (max-height: 760px) {
@@ -209,6 +232,17 @@
 @media (min-width: 1200px) and (max-height: 760px) {
   .prototype-frame { --content-padding: 20px; }
   .viewport-actions { right: 20px; bottom: 20px; }
+}
+
+@media (min-width: 1200px) and (max-height: 620px) {
+  .shell--landing, .shell--experience { --rail-step-min-height: 30px; --brand-margin: 8px; }
+  .shell--experience .progress-rail { margin-bottom: 0; }
+  .sidebar-gacha { display: none; }
+  .brand-symbol { width: 32px; height: 32px; }
+  .brand-lockup h1 { font-size: 22px; }
+  .rail-step { padding-block: 2px; }
+  .rail-step.active { padding-block: 1px; }
+  .rail-number { width: 22px; height: 22px; }
 }
 
 @media (max-width: 1199px) {
@@ -253,6 +287,7 @@
   .viewport-actions > .button-hitbox { flex: 1 1 auto; }
   .shell--landing .welcome-composition { grid-template-columns: minmax(0, 1fr); gap: 24px; min-height: 0; }
   .shell--landing .welcome-copy h2 { font-size: 48px; }
+  .shell--landing .welcome-heading-line { font-size: clamp(36px, 11vw, 48px); }
   .shell--landing .welcome-copy .highlight-word { font-size: clamp(38px, 12vw, 48px); }
   .shell--landing .welcome-copy .panel-copy { font-size: 16px; }
   .shell--landing .welcome-copy .primary-button { min-height: 52px; min-width: 208px; font-size: 13px; }

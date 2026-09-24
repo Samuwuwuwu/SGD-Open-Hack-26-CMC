@@ -1,6 +1,7 @@
 @import './window.css';
 @import './journey.css';
 @import './drops.css';
+@import './box-flow.css';
 
 :root {
   --canvas: #F7F5EE;

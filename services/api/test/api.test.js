@@ -3,7 +3,7 @@ import test, { after, before } from 'node:test';
 import app from '../src/app.js';
 import { getDemoInventory } from '../src/services/inventoryService.js';
 import { nextQuizQuestion } from '../src/services/quizService.js';
-import { buildDropBundle, filterInventory, findDropCandidates } from '../src/domain/matching.js';
+import { filterInventory } from '../src/domain/matching.js';
 
 let server;
 let baseUrl;
@@ -32,8 +32,9 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
 
   assert.equal(response.status, 200);
   assert.equal(body.source, 'inventory.xlsx');
-  assert.equal(body.items.length, 35);
-  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 35);
+  assert.equal(body.items.length, 63);
+  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 63);
+  assert.equal(body.items.filter((item) => item.provider === 'Demo Warehouse (synthetic)').length, 28);
   assert.equal(typeof body.items[0].retail_price, 'number');
   assert.equal(typeof body.items[0].surplus_price, 'number');
   assert.equal(typeof body.items[0].discount_pct, 'number');
@@ -51,64 +52,51 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
   assert.deepEqual(inventory, body.items);
 });
 
-test('POST /api/drops/match builds one budget-safe, varied bundle deterministically', async () => {
-  const payload = { budget: 60, preferences: ['shareable'], constraints: { dietary: 'vegan', size: 'any' } };
-  const response = await fetch(`${baseUrl}/api/drops/match`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const body = await response.json();
-  assert.equal(response.status, 200);
-  assert.equal(body.status, 'ok');
-  assert.deepEqual(body.drop.items.map((item) => item.sku), ['RO-010', 'RO-028', 'RO-025', 'RO-009']);
-  assert.ok(body.drop.items.length >= 4 && body.drop.items.length <= 8);
-  assert.ok(body.drop.total <= payload.budget);
-  assert.equal(body.drop.budget, payload.budget);
-  assert.equal(new Set(body.drop.items.map((item) => item.category)).size, body.drop.items.length);
-  assert.ok(body.drop.items.every((item) => item.product_name && item.surplus_price <= payload.budget));
-});
-
-test('matching fills a sparse quiz result with other eligible stock, up to three boxes', () => {
-  const inventory = [
-    { sku: 'A', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, tags: ['rare'] },
-    { sku: 'B', active: true, condition: 'new', stock_qty: 1, surplus_price: 25, tags: ['other'] },
-    { sku: 'C', active: true, condition: 'new', stock_qty: 1, surplus_price: 30, tags: ['other'] },
-    { sku: 'D', active: true, condition: 'new', stock_qty: 1, surplus_price: 70, tags: ['other'] },
-  ];
-  const candidates = findDropCandidates({ inventory, budget: 50, quizFilters: [['rare']] });
-  assert.deepEqual(candidates.map((item) => item.sku), ['A', 'B', 'C']);
-});
-
-test('bundle matching never exceeds the budget while preferring category variety', () => {
-  const inventory = [
-    { sku: 'A', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'food', tags: ['rare'] },
-    { sku: 'B', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'food', tags: ['other'] },
-    { sku: 'C', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'home', tags: ['other'] },
-    { sku: 'D', active: true, condition: 'new', stock_qty: 1, surplus_price: 20, category: 'tech', tags: ['other'] },
-  ];
-  const bundle = buildDropBundle({ inventory, budget: 60, quizFilters: [['rare']] });
-  assert.deepEqual(bundle.map((item) => item.sku), ['A', 'C', 'D']);
-  assert.ok(bundle.reduce((total, item) => total + item.surplus_price, 0) <= 60);
-});
-
 test('category and condition controls are hard inventory constraints', () => {
   const inventory = getDemoInventory();
-  const newOnly = filterInventory({
-    inventory,
-    budget: 150,
-    constraints: { categories: ['electronics'], conditionMode: 'new_only' },
-  });
-  const withPreLoved = filterInventory({
-    inventory,
-    budget: 150,
-    constraints: { categories: ['electronics'], conditionMode: 'allow_preloved' },
-  });
-
+  const newOnly = filterInventory({ inventory, budget: 150, constraints: { categories: ['electronics'], conditionMode: 'new_only' } });
+  const withPreLoved = filterInventory({ inventory, budget: 150, constraints: { categories: ['electronics'], conditionMode: 'allow_preloved' } });
   assert.ok(newOnly.length > 0);
   assert.ok(newOnly.every((item) => item.category === 'electronics' && item.condition === 'new'));
   assert.ok(withPreLoved.some((item) => item.condition === 'preloved_like_new'));
   assert.ok(withPreLoved.every((item) => item.category === 'electronics'));
+});
+
+test('sealed offers reveal distinct, deterministic bundles with prices and clues matching their contents', async () => {
+  const payload = { budget: 60, preferences: ['shareable'], constraints: { dietary: 'vegan', size: 'any' } };
+  const post = (route, body) => fetch(`${baseUrl}/api/drops/${route}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const response = await post('match', payload);
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.status, 'ok');
+  assert.equal(body.candidates.length, 4);
+  assert.deepEqual(await (await post('match', payload)).json(), body);
+  const sealed = JSON.stringify(body);
+  for (const field of ['sku', 'product_name', 'items', 'image_url', 'surplus_price']) assert.ok(!sealed.includes(`"${field}"`));
+  const signatures = [];
+  for (const candidate of body.candidates) {
+    const reveal = await post('reveal', { ...payload, id: candidate.id });
+    assert.equal(reveal.status, 200);
+    const { drop } = await reveal.json();
+    const { items, ...preview } = drop;
+    assert.deepEqual(preview, candidate);
+    assert.equal(items.length, candidate.itemCount);
+    assert.equal(Math.round(items.reduce((sum, item) => sum + item.surplus_price, 0) * 100) / 100, candidate.total);
+    assert.ok(candidate.total <= payload.budget);
+    assert.equal(candidate.categories.reduce((sum, group) => sum + group.count, 0), items.length);
+    assert.ok(items.every((item) => item.active && item.stock_qty > 0));
+    assert.ok(items.every((item) => item.category !== 'food' || item.dietary.includes('vegan')));
+    assert.equal(new Set(items.map((item) => item.sku)).size, items.length);
+    signatures.push(items.map((item) => item.sku).sort().join('|'));
+    assert.deepEqual(await (await post('reveal', { ...payload, id: candidate.id })).json(), { drop });
+    assert.equal((await post('reveal', { ...payload, budget: 61, id: candidate.id })).status, 409);
+  }
+  assert.equal(new Set(signatures).size, signatures.length);
+  assert.equal((await post('reveal', { ...payload, id: 'not-an-offer' })).status, 409);
 });
 
 test('quiz requests strict structured output and keeps inventory tag validation', async () => {
@@ -201,7 +189,7 @@ test('quiz requires four questions and caps the journey at five', async () => {
 
   try {
     const afterThree = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['shareable'], ['shareable'], ['shareable']] });
-    const earlyAfterFour = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['fashion'], ['fashion'], ['fashion'], ['fashion']] });
+    const earlyAfterFour = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['rave'], ['rave'], ['rave'], ['rave']] });
     const afterFive = await nextQuizQuestion({ budget: 60, topic: 'Random', constraints, quizFilters: [['shareable'], ['shareable'], ['shareable'], ['shareable'], ['shareable']] });
 
     assert.equal(afterThree.done, false);

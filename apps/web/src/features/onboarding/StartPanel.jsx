@@ -6,7 +6,7 @@ function StartPanel({ onStart }) {
     <section className="start-panel">
       <div className="welcome-composition">
         <div className="welcome-copy">
-          <h2>Good stuff.<br /><span className="highlight-word">New game.</span></h2>
+          <h2><span className="welcome-heading-line">Good stuff.</span><br /><span className="highlight-word">New game.</span></h2>
           <p className="panel-copy">Give surplus a second chance. Set your range, tune your vibe, and discover a drop that feels like you.</p>
           <ButtonLift><button className="primary-button" type="button" onClick={onStart}>Start my drop <IconGlyph name="arrowUpRight" size={20} /></button></ButtonLift>
         </div>
