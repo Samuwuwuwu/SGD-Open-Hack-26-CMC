@@ -1,53 +1,54 @@
 # ROLLOVER
 
-ROLLOVER is a prototype for SDG Open Hack 2026, Challenge 2 / SDG 12. It explores a circular-retail flow where customers move through a short preference experience that produces several explainable drop candidates before anything is fulfilled.
+**A playable circular-retail prototype that turns surplus products into personalized mystery boxes.** Built for SDG Open Hack 2026, Challenge 2 (SDG 12: Responsible Consumption and Production).
 
-This repository is intentionally small and demo-first. The current golden path is: recipient → budget → category → quiz → compare sealed boxes → box opening → individual item reveals → expandable haul summary.
+Retailers can have sellable stock that shoppers never discover. ROLLOVER explores a different path through that inventory: a shopper sets a budget and explicit constraints, answers a short personality quiz, compares up to four boxes, then opens one to inspect its exact contents before deciding whether to save it. The experience demonstrates discovery and consideration; it does not process a purchase.
 
-The committed workbook contains 36 named, photographed products, including 20 fashion listings across clothing, shoes, and accessories. Availability, condition, surplus reasons, and prices are illustrative demo data; the named brands are not project partners. Product photos are stored locally, and their creators, sources, licenses, and image edits are recorded in `data/product_photo_sources.json` and shown in the haul details. The budget range extends to $1,000, and later boxes can surface higher-priced finds within that limit.
+## Try the demo locally
 
-Matching offers up to four distinct bundles within the budget, with item counts, category mixes, colours, and relevant material clues. Show at most three boxes side by side on desktop; the box scroller reveals the others. Opening a box returns its predetermined inventory items; the client animates the opening and lets customers reveal each card or reveal all. Opened boxes and saved demo picks persist while the app stays open. There is no payment, inventory reservation, or fulfilment.
-
-Quiz answers guide a graded stock match, even when no item fits every answer. Common category tags are excluded from quiz choices, and boxes favor items not already shown; a small eligible pool can produce fewer boxes. Explicit budget, category, size, diet, allergen, and condition limits still apply.
-
-## Repository structure
-
-- `apps/web/` — React + Vite customer prototype.
-- `services/api/` — Express API, demo inventory, and matching seams.
-- `data/inventory.xlsx` — committed demo inventory source read by the API.
-- `data/generate_inventory.mjs` — optional workbook authoring utility; normal setup reads the committed workbook.
-- `setup-dev.bat`, `validate-local.bat` — local lifecycle commands.
-
-## First-time setup
-
-From the repository root, run:
+Requires **Node.js 22+** and npm. On Windows, from the repository root:
 
 ```bat
 setup-dev.bat
-```
-
-The setup is repeat-safe, requires Node.js 22+, installs the npm lockfile, and creates `.env` from `.env.example` when needed.
-
-## Development
-
-Run the full stack (API + Frontend) directly in your current terminal:
-
-```sh
 npm run dev
 ```
 
-This starts both the backend API (`http://localhost:3001`) and the frontend (`http://localhost:5173`) concurrently with unified logs. You can run this command from the repository root, `apps/web`, or `services/api`. Stop both at any time with `Ctrl+C`.
+Open **http://localhost:5173**. The Express API runs at **http://localhost:3001**. `setup-dev.bat` installs the locked dependencies and creates `.env` from `.env.example` if needed. No API key, database, Docker, or account is required for the normal demo path.
 
-To generate quiz questions with GPT-4.1 nano, add `OPENAI_API_KEY` to your root `.env` file. The API uses `gpt-4.1-nano` by default and falls back to built-in questions when no key is configured or the provider is unavailable. If your existing `.env` sets `OPENAI_MODEL=gpt-6-luna`, change that line to `OPENAI_MODEL=gpt-4.1-nano` or remove it. Keep the key out of `VITE_` variables so it stays server-side.
+For a quick walkthrough, choose a recipient, set a budget, pick categories and any relevant size, dietary, or condition limits, then answer the quiz. Compare the sealed boxes, open one, reveal its products, and expand the haul details. A smaller eligible inventory may yield fewer than four boxes.
 
-Individual service commands are also available:
-- `npm run dev:web` — Frontend only
-- `npm run dev:api` — API only
+## What the prototype demonstrates
 
-## Validation
+- **Explainable discovery.** Each sealed box shows its actual total, item count, category mix, colour clues, and relevant materials before the exact products are revealed.
+- **Inventory-grounded matching.** The API reads the committed `data/inventory.xlsx` workbook, enforces budget and explicit constraints, then scores and assembles distinct bundles. If the eligible pool is small, it returns fewer offers instead of duplicating a bundle.
+- **A stable reveal.** `/api/drops/match` returns box previews; `/api/drops/reveal` recomputes the same deterministic offer and returns its products after selection. The opening animation does not choose or change the inventory.
+- **A complete inspection flow.** The shopper moves through box opening, individual product pulls, and an expandable haul summary with product facts and photo credits. Opened boxes, reveal progress, and saved picks remain available during the current session.
+- **Optional AI copy.** When configured, GPT-4.1 nano writes quiz questions using tags drawn from eligible stock. Built-in questions cover the demo when the provider is unavailable. The model never supplies prices, availability, sizes, or other hard product facts.
+
+## How it is built
+
+| Layer | Responsibility |
+| --- | --- |
+| React 19 + Vite 8 (`apps/web/`) | Guided customer journey, box comparison, reveal interactions, and responsive presentation |
+| Node.js + Express 5 (`services/api/`) | Quiz endpoint, workbook normalization, matching, and sealed/revealed drop endpoints |
+| Excel workbook (`data/inventory.xlsx`) | Committed source of demo product facts |
+
+The frontend calls the API through `apps/web/src/services/api.js`. Matching lives in `services/api/src/domain/matching.js`, while API routes remain thin. This keeps pricing and eligibility decisions on the server and makes the same offer reproducible at reveal time.
+
+To enable generated quiz wording, add `OPENAI_API_KEY` to the root `.env`. The default model is `gpt-4.1-nano`; `OPENAI_MODEL` can override it. Keep the key server-side, outside `VITE_` variables. Without a key, the built-in quiz runs automatically.
+
+## Scope and data
+
+Inventory, availability, condition, prices, and surplus reasons are **illustrative demo data**. Named brands are not project partners. Product photos are stored locally; their creators, sources, licenses, and edits are documented in [`data/product_photo_sources.json`](data/product_photo_sources.json) and displayed in the haul details.
+
+This prototype has no payment, inventory reservation, retailer integration, authentication, or fulfilment. Saving a drop is a session-only demo action. Its goal is to make the discovery and inspection experience concrete, not to claim a live commerce operation or measured waste reduction.
+
+## Development and validation
+
+From the repository root, `npm run dev` starts both services. `npm run dev:web` and `npm run dev:api` start them individually. The Windows validation script runs lint, API tests, and a frontend production build:
 
 ```bat
 validate-local.bat
 ```
 
-This runs frontend lint/build checks and API tests. No database, Docker, Python, authentication, or external AI provider is required for the normal path.
+Equivalent npm commands are `npm run lint`, `npm test`, and `npm run build`.
