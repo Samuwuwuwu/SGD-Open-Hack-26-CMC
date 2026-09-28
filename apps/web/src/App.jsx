@@ -22,12 +22,11 @@ function App() {
   const [budget, setBudget] = useState(60);
   const [recipientMode, setRecipientMode] = useState('self');
   const [preferences, setPreferences] = useState([]);
-  const [constraints, setConstraints] = useState({ size: 'M', dietary: 'any', categories: [], conditionMode: 'new_only' });
+  const [constraints, setConstraints] = useState({ size: 'any', dietary: 'any', categories: [], conditionMode: 'new_only' });
   const [quizTopic, setQuizTopic] = useState('');
   const [quizFilters, setQuizFilters] = useState([]);
   const [quizHistory, setQuizHistory] = useState([]);
   const [quizQuestion, setQuizQuestion] = useState(null);
-  const [quizRemaining, setQuizRemaining] = useState(0);
   const [quizAvailable, setQuizAvailable] = useState(0);
   const [quizLoading, setQuizLoading] = useState(false);
   const [candidates, setCandidates] = useState([]);
@@ -78,7 +77,6 @@ function App() {
     setQuizFilters([]);
     setQuizHistory([]);
     setQuizQuestion(null);
-    setQuizRemaining(0);
     setQuizAvailable(0);
     setQuizLoading(false);
     setPreferences([]);
@@ -114,7 +112,6 @@ function App() {
     try {
       const result = await getQuizQuestion({ recipientMode, topic, budget, constraints, quizFilters: filters, quizHistory: history });
       if (requestId !== quizRequest.current) return;
-      setQuizRemaining(result.remainingCount || 0);
       setQuizAvailable(result.availableCount || 0);
       if (result.done) await findDrops(filters, preferenceTags, requestId);
       else setQuizQuestion(result);
@@ -252,9 +249,9 @@ function App() {
                 <p className="panel-copy">Set your limit. Every box will stay within it.</p>
                 <div className="budget-console">
                   <label className="rail-label" htmlFor="drop-budget">Your spending limit</label>
-                  <output className="budget-readout" htmlFor="drop-budget">${budget}</output>
-                  <input id="drop-budget" aria-label="Drop budget" className="budget-slider" type="range" min="10" max="150" step="5" value={budget} onChange={(event) => { setBudget(Number(event.target.value)); resetQuiz(); }} />
-                  <div className="range-labels"><span>$10</span><span>$150</span></div>
+                  <output className="budget-readout" htmlFor="drop-budget">${budget.toLocaleString('en-SG')}</output>
+                  <input id="drop-budget" aria-label="Drop budget" className="budget-slider" type="range" min="10" max="1000" step="5" value={budget} onChange={(event) => { setBudget(Number(event.target.value)); resetQuiz(); }} />
+                  <div className="range-labels"><span>$10</span><span>$1,000</span></div>
                 </div>
               </section>}
               {screen === 'category' && <section className="journey-panel budget-panel">
@@ -286,7 +283,7 @@ function App() {
                 </div>
               </section>}
               {screen === 'quiz' && <>
-                <PreferencePanel topic={quizTopic} question={quizQuestion} remainingCount={quizRemaining} availableCount={quizAvailable} isLoading={quizLoading} recipientMode={recipientMode}
+                <PreferencePanel topic={quizTopic} question={quizQuestion} availableCount={quizAvailable} isLoading={quizLoading} recipientMode={recipientMode}
                   onChooseTopic={chooseTopic} onAnswer={answerQuestion} onResetTopic={resetQuiz} />
                 {error && quizTopic && !quizLoading && <ButtonLift><button className="primary-button" type="button" onClick={() => loadQuestion(quizTopic, quizFilters)}>Try again<IconGlyph name="refresh" size={18} /></button></ButtonLift>}
               </>}

@@ -5,7 +5,7 @@ import { buildBoxCandidates, filterInventory } from '../src/domain/matching.js';
 const product = (sku, price, extra = {}) => ({ sku, surplus_price: price, category: 'lifestyle', condition: 'new', tags: ['practical'], active: true, stock_qty: 3, ...extra });
 
 test('ample inventory produces different counts, prices, and SKU sets within one budget', () => {
-  const inventory = [7, 11, 14, 20, 24, 29].map((price, index) => product(String(index), price, { category: `category-${index}` }));
+  const inventory = Array.from({ length: 20 }, (_, index) => product(String(index), 5, { category: `category-${index}` }));
   const input = { inventory, budget: 60, preferences: ['practical'] };
   const boxes = buildBoxCandidates(input);
   assert.equal(boxes.length, 4);
@@ -14,6 +14,37 @@ test('ample inventory produces different counts, prices, and SKU sets within one
   assert.equal(new Set(boxes.map((box) => box.items.map((item) => item.sku).sort().join('|'))).size, 4);
   assert.ok(boxes.every((box) => box.total <= 60));
   assert.deepEqual(buildBoxCandidates(input), boxes);
+});
+
+test('higher budgets include higher-priced eligible finds in later boxes', () => {
+  const inventory = [15, 25, 40, 60, 90, 130, 180, 240, 300, 350, 420, 480, 550, 630, 790, 890]
+    .map((price, index) => product(`item-${index}`, price));
+  const boxes = buildBoxCandidates({ inventory, budget: 1000, preferences: ['practical'] });
+  assert.ok(boxes.find((box) => box.theme === 'wild')?.items.some((item) => item.surplus_price >= 400));
+  assert.ok(boxes.find((box) => box.theme === 'full')?.items.some((item) => item.surplus_price >= 650));
+  assert.ok(boxes.every((box) => box.total <= 1000));
+});
+
+test('different answers steer boxes even when no product matches every answer', () => {
+  const inventory = [
+    product('city', 20, { tags: ['fashion', 'streetwear', 'energetic'] }),
+    product('quiet', 20, { tags: ['fashion', 'calm', 'slow'] }),
+    product('neutral', 20, { tags: ['fashion', 'practical'] }),
+  ];
+  const choice = (quizFilters) => buildBoxCandidates({ inventory, budget: 50, preferences: ['fashion'], quizFilters })
+    .find((box) => box.theme === 'little').items[0].sku;
+
+  assert.equal(choice([['streetwear'], ['energetic'], ['unmatched']]), 'city');
+  assert.equal(choice([['calm'], ['slow'], ['unmatched']]), 'quiet');
+});
+
+test('boxes use different products when enough equally relevant stock is available', () => {
+  const inventory = Array.from({ length: 20 }, (_, index) => product(`item-${index}`, 20));
+  const boxes = buildBoxCandidates({ inventory, budget: 100, preferences: ['practical'] });
+  const allSkus = boxes.flatMap((box) => box.items.map((item) => item.sku));
+
+  assert.equal(boxes.length, 4);
+  assert.equal(new Set(allSkus).size, allSkus.length);
 });
 
 test('unknown food diet and apparel size cannot satisfy explicit constraints; one-size accessories can', () => {
@@ -45,9 +76,21 @@ test('sparse stock produces one real offer and invalid or insufficient budgets p
   for (const budget of [0, -1, 'invalid', 12, Infinity]) assert.deepEqual(buildBoxCandidates({ inventory, budget }), []);
 });
 
+test('sparse boxes stop once every eligible product has been offered', () => {
+  const inventory = [product('first', 10), product('second', 10)];
+  const boxes = buildBoxCandidates({ inventory, budget: 100 });
+  const seen = new Set();
+
+  for (const box of boxes) {
+    assert.ok(box.items.some((item) => !seen.has(item.sku)));
+    box.items.forEach((item) => seen.add(item.sku));
+  }
+  assert.ok(boxes.length <= 2);
+});
+
 test('nearby matches cannot bypass hard constraints and totals use integer cents', () => {
-  const inventory = [product('a', 0.1), product('b', 0.2), product('c', 0.31)];
-  const boxes = buildBoxCandidates({ inventory, budget: 0.3, quizFilters: [['missing']] });
+  const inventory = [product('a', 0.1), product('b', 0.2), product('c', 0.68)];
+  const boxes = buildBoxCandidates({ inventory, budget: 0.67, quizFilters: [['missing']] });
   assert.ok(boxes.some((box) => box.items.length === 2 && box.total === 0.3));
-  assert.ok(boxes.every((box) => box.total <= 0.3 && !box.items.some((item) => item.sku === 'c')));
+  assert.ok(boxes.every((box) => box.total <= 0.67 && !box.items.some((item) => item.sku === 'c')));
 });

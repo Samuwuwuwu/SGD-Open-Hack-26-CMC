@@ -1,8 +1,28 @@
 import { inventory } from '../data/inventory.js';
 import { filterInventory } from '../domain/matching.js';
 
-const DEFAULT_MODEL = 'gpt-oss-120b';
-const DEFAULT_BASE_URL = 'https://api.cerebras.ai/v1';
+const DEFAULT_MODEL = 'gpt-4.1-nano';
+const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
+const BROAD_TAGS = new Set(['fashion', 'food', 'home', 'tech', 'lifestyle', 'stationery', 'beauty']);
+const FALLBACK_PROMPTS = [
+  'Which kind of moment sounds most like you?',
+  'Pick the energy for your next chapter.',
+  'What would make an ordinary day better?',
+  'Which direction would you take first?',
+  'What sounds like a good plot twist?',
+];
+const FALLBACK_TAG_LABELS = {
+  adventurous: 'Follow the unexpected detour', audio: 'Set the scene to music', beauty: 'Make time for a little reset',
+  bold: 'Step into the spotlight', calm: 'Find a quiet corner', classic: 'Choose a familiar favourite',
+  clean: 'Keep things fresh and simple', colourful: 'Bring a splash of colour', comfort: 'Get comfortably settled',
+  cozy: 'Stay for the warm atmosphere', decorative: 'Make the scene memorable', edgy: 'Take the less expected route',
+  energetic: 'Turn the energy all the way up', fashion: 'Make an entrance', food: 'Bring the whole crew',
+  home: 'Stay in for a good evening', lifestyle: 'Make the everyday an adventure', luxury: 'Make it an occasion',
+  minimal: 'Keep only the essentials', natural: 'Head somewhere green', playful: 'Make a game of it',
+  portable: 'Leave room for a spontaneous trip', practical: 'Have a plan that works', shareable: 'Invite everyone along',
+  slow: 'Take the scenic route', stationery: 'Start a fresh chapter', streetwear: 'Explore the city after dark',
+  tech: 'Try a clever new trick',
+};
 const QUESTION_STYLES = [
   'social situation',
   'location / destination choice',
@@ -83,11 +103,11 @@ function fallbackQuestion(tags, remainingCount, questionCount = 0) {
     done: false,
     source: 'fallback',
     remainingCount,
-    question: template.question,
-    options: Array.from({ length: tags.length > 0 ? 4 : 0 }, (_, index) => ({
-      label: template.answers[index],
-      tags: [tags[index % tags.length][0]],
-    })),
+    question: FALLBACK_PROMPTS[questionCount % FALLBACK_PROMPTS.length],
+    options: Array.from({ length: 4 }, (_, index) => {
+      const tag = tags[(questionCount * 4 + index) % tags.length][0];
+      return { label: FALLBACK_TAG_LABELS[tag] || template.answers[index], tags: [tag] };
+    }),
   };
 }
 
@@ -98,27 +118,27 @@ function normalizeQuestion(raw, allowedTags, remainingCount) {
     .slice(0, 4)
     .map((option) => ({
       label: String(option?.label || '').trim(),
-      tags: [...new Set(Array.isArray(option?.tags) ? option.tags.filter((tag) => allowedTags.has(tag)).slice(0, 2) : [])],
+      tags: [...new Set(Array.isArray(option?.tags) ? option.tags.filter((tag) => allowedTags.has(tag)).slice(0, 1) : [])],
     }))
     .filter((option) => option.label && option.tags.length);
 
-  if (options.length !== 4) return null;
+  if (options.length !== 4 || new Set(options.map((option) => option.tags[0])).size !== 4) return null;
 
   return {
     done: false,
-    source: 'cerebras',
+    source: 'openai',
     remainingCount,
     question: String(raw.question).trim(),
     options,
   };
 }
 
-async function askCerebras({ topic, tags, questionCount, quizHistory, recipientMode }) {
-  const apiKey = process.env.CEREBRAS_API_KEY;
-  if (!apiKey) throw new Error('CEREBRAS_API_KEY is not configured.');
+async function askOpenAI({ topic, tags, questionCount, quizHistory, recipientMode }) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY is not configured.');
 
-  const baseUrl = process.env.CEREBRAS_BASE_URL || DEFAULT_BASE_URL;
-  const model = process.env.CEREBRAS_MODEL || DEFAULT_MODEL;
+  const baseUrl = process.env.OPENAI_BASE_URL || DEFAULT_BASE_URL;
+  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
   const tagSummary = tags.map(([tag, count]) => `${tag} (${count})`).join(', ');
   const styleHint = QUESTION_STYLES[questionCount % QUESTION_STYLES.length];
   const historyText = formatQuizHistory(quizHistory);
@@ -139,8 +159,7 @@ async function askCerebras({ topic, tags, questionCount, quizHistory, recipientM
     body: JSON.stringify({
       model,
       temperature: 0.9,
-      reasoning_effort: 'low',
-      max_completion_tokens: 800,
+      max_completion_tokens: 400,
       response_format: {
         type: 'json_schema',
         json_schema: {
@@ -201,33 +220,33 @@ Use a situation, character, reaction, place, social moment, absurd hypothetical,
 Never mention products, items, shopping, purchases, inventory, accessories, clothes, gadgets, or buying/wearing anything.
 Do not ask direct product or purchase preferences.
 
-Each answer secretly filters real stock. For each option, attach 1 or 2 tags ONLY from this list:
+Each answer secretly guides real stock. Attach exactly ONE tag to each option, chosen ONLY from this list:
 ${tagSummary}
 
 The visible question and answers should make a plausible association with their tags, but must not reveal or literally name the tags, product categories, inventory, or filtering.
 
-Prefer different tags across the four options.
+Use four different tags across the four options.
 Return one question object using the response format.`,
         },
       ],
     }),
   });
 
-  if (!response.ok) throw new Error(`Cerebras returned ${response.status}.`);
+  if (!response.ok) throw new Error(`OpenAI returned ${response.status}.`);
 
   const body = await response.json();
   const choice = body.choices?.[0];
   const finishReason = choice?.finish_reason || 'unknown';
-  console.info(`[quiz] Cerebras ${response.status} · ${model} · source=cerebras · finish=${finishReason}`);
+  console.info(`[quiz] OpenAI ${response.status} · ${model} · source=openai · finish=${finishReason}`);
   const content = choice?.message?.content;
   if (typeof content !== 'string' || !content.trim()) {
-    throw new Error(`Cerebras returned no quiz content (finish_reason: ${finishReason}).`);
+    throw new Error(`OpenAI returned no quiz content (finish_reason: ${finishReason}).`);
   }
 
   try {
     return parseJson(content);
   } catch {
-    throw new Error(`Cerebras returned invalid quiz JSON (finish_reason: ${finishReason}).`);
+    throw new Error(`OpenAI returned invalid quiz JSON (finish_reason: ${finishReason}).`);
   }
 }
 
@@ -246,7 +265,7 @@ export async function nextQuizQuestion(payload = {}) {
     quizFilters,
   });
 
-  if (remaining.length === 0) {
+  if (eligible.length === 0) {
     return { done: true, source: 'inventory', remainingCount: 0, availableCount: eligible.length };
   }
 
@@ -254,15 +273,17 @@ export async function nextQuizQuestion(payload = {}) {
     return { done: true, source: 'inventory', remainingCount: remaining.length, availableCount: eligible.length };
   }
 
-  const tags = tagCounts(remaining).filter(([, count]) => count > 0).slice(0, 18);
+  const countedTags = tagCounts(eligible).filter(([tag]) => !BROAD_TAGS.has(tag));
+  const distinctiveTags = countedTags.filter(([, count]) => count < eligible.length / 2);
+  const tags = (distinctiveTags.length >= 4 ? distinctiveTags : countedTags).slice(0, 18);
   if (tags.length < 4) {
-    return { ...fallbackQuestion(tags, remaining.length, questionCount), availableCount: eligible.length };
+    return { done: true, source: 'inventory', remainingCount: remaining.length, availableCount: eligible.length };
   }
 
   const allowedTags = new Set(tags.map(([tag]) => tag));
 
   try {
-    const raw = await askCerebras({
+    const raw = await askOpenAI({
       topic: payload.topic || 'Random',
       tags,
       questionCount: quizFilters.length,
@@ -271,7 +292,7 @@ export async function nextQuizQuestion(payload = {}) {
     });
     return { ...(normalizeQuestion(raw, allowedTags, remaining.length) || fallbackQuestion(tags, remaining.length, questionCount)), availableCount: eligible.length };
   } catch (error) {
-    console.warn('[quiz] Cerebras unavailable, using fallback:', error.message);
+    console.warn('[quiz] OpenAI unavailable, using fallback:', error.message);
     return { ...fallbackQuestion(tags, remaining.length, questionCount), availableCount: eligible.length };
   }
 }

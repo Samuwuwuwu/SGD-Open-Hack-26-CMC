@@ -6,7 +6,6 @@ const topics = ['Music', 'Games', 'Movies & TV', 'My Little Pony', 'Random'];
 function PreferencePanel({
   topic,
   question,
-  remainingCount,
   availableCount,
   isLoading,
   recipientMode,
@@ -37,7 +36,7 @@ function PreferencePanel({
     <section className="journey-panel preference-panel quiz-panel">
       <div className="quiz-meta">
         <ButtonLift><button className="quiz-topic-button" type="button" onClick={onResetTopic}>{topic} <IconGlyph name="rotate" size={16} /></button></ButtonLift>
-        {availableCount > 0 && <span>{remainingCount} exact {remainingCount === 1 ? 'match' : 'matches'} · {availableCount} finds in the mix</span>}
+        {availableCount > 0 && <span>{availableCount} finds in the mix</span>}
       </div>
 
       {isLoading ? (

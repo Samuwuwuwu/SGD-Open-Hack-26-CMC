@@ -68,7 +68,7 @@ export default function ItemPulls({ drop, revealedIds, onReveal, onSummary, onBa
       context.fillStyle = '#111111';
       context.fillText('Second life. Great finds.', 82, 322);
       context.font = '500 27px Arial, sans-serif';
-      context.fillText(`${drop.items.length} pre-loved finds · ${drop.label}`, 72, 410);
+      context.fillText(`${drop.items.length} surplus finds · ${drop.label}`, 72, 410);
       const palette = ['#00d8e8', '#c8ff00', '#ff2d9a', '#ff5b00'];
       drop.items.forEach((item, index) => {
         const y = 472 + index * 150;

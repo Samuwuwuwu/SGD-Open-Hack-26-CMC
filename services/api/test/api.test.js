@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test, { after, before } from 'node:test';
 import app from '../src/app.js';
 import { getDemoInventory } from '../src/services/inventoryService.js';
@@ -32,9 +35,14 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
 
   assert.equal(response.status, 200);
   assert.equal(body.source, 'inventory.xlsx');
-  assert.equal(body.items.length, 63);
-  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 63);
-  assert.equal(body.items.filter((item) => item.provider === 'Demo Warehouse (synthetic)').length, 28);
+  assert.equal(body.items.length, 36);
+  assert.equal(new Set(body.items.map((item) => item.product_name)).size, 36);
+  assert.ok(body.items.some((item) => item.product_name === 'Nike Air Jordan 1 Crimson Tint'));
+  assert.ok(body.items.some((item) => item.product_name === 'Louis Vuitton Monogram Vernis Amarante Bag'));
+  assert.ok(body.items.some((item) => item.product_name === 'Stone Island Jacket'));
+  const publicDirectory = fileURLToPath(new URL('../../../apps/web/public/', import.meta.url));
+  assert.ok(body.items.every((item) => item.image_url.startsWith('/products/') && existsSync(path.join(publicDirectory, item.image_url.slice(1)))));
+  assert.ok(body.items.every((item) => item.image_creator && item.image_source && item.image_license && item.image_license_url));
   assert.equal(typeof body.items[0].retail_price, 'number');
   assert.equal(typeof body.items[0].surplus_price, 'number');
   assert.equal(typeof body.items[0].discount_pct, 'number');
@@ -45,10 +53,12 @@ test('GET /api/inventory/demo returns normalized workbook inventory', async () =
   assert.ok(body.items.every((item) => Array.isArray(item.tags)));
   assert.ok(body.items.every((item) => item.primary_colour && item.secondary_colour && item.materials && item.mystery_teaser));
   assert.ok(body.items.every((item) => item.discount_mode === 'markdown' || (item.discount_pct === 0 && item.show_discount === false && item.surplus_price === item.retail_price)));
-  assert.deepEqual(body.items.find((item) => item.product_name === 'Hyaluronic Acid Serum 50ml').discount_mode, 'protected');
-  assert.equal(body.items.find((item) => item.product_name === 'Truffle Sea Salt Mushroom Crisps').show_discount, true);
-  assert.deepEqual(body.items.find((item) => item.product_name === 'Herbed Lentil Crisp Kit').allergens, []);
-  assert.ok(body.items.filter((item) => item.condition !== 'new').length >= 4);
+  assert.equal(body.items.find((item) => item.product_name === 'Nike Air Jordan 1 Crimson Tint').condition, 'preloved_like_new');
+  assert.equal(body.items.find((item) => item.product_name === 'Oreo Original Cookies').show_discount, true);
+  assert.deepEqual(body.items.find((item) => item.product_name === 'Nestlé KitKat Milk Chocolate').allergens, ['gluten', 'milk', 'soy']);
+  assert.ok(body.items.filter((item) => item.condition !== 'new').length >= 2);
+  assert.ok(body.items.filter((item) => item.category === 'fashion').length >= 20);
+  assert.ok(body.items.filter((item) => item.category === 'fashion' && item.surplus_price >= 400).length >= 3);
   assert.deepEqual(inventory, body.items);
 });
 
@@ -73,7 +83,7 @@ test('sealed offers reveal distinct, deterministic bundles with prices and clues
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.status, 'ok');
-  assert.equal(body.candidates.length, 4);
+  assert.ok(body.candidates.length > 0 && body.candidates.length <= 4);
   assert.deepEqual(await (await post('match', payload)).json(), body);
   const sealed = JSON.stringify(body);
   for (const field of ['sku', 'product_name', 'items', 'image_url', 'surplus_price']) assert.ok(!sealed.includes(`"${field}"`));
@@ -101,18 +111,22 @@ test('sealed offers reveal distinct, deterministic bundles with prices and clues
 
 test('quiz requests strict structured output and keeps inventory tag validation', async () => {
   const previousFetch = globalThis.fetch;
-  const previousApiKey = process.env.CEREBRAS_API_KEY;
-  const previousBaseUrl = process.env.CEREBRAS_BASE_URL;
-  const previousModel = process.env.CEREBRAS_MODEL;
+  const previousApiKey = process.env.OPENAI_API_KEY;
+  const previousBaseUrl = process.env.OPENAI_BASE_URL;
+  const previousModel = process.env.OPENAI_MODEL;
   const previousInfo = console.info;
+  let requestUrl;
+  let requestHeaders;
   let requestBody;
   let infoLine;
 
-  process.env.CEREBRAS_API_KEY = 'test-key';
-  process.env.CEREBRAS_BASE_URL = 'https://cerebras.test/v1';
-  process.env.CEREBRAS_MODEL = 'gpt-oss-120b';
+  process.env.OPENAI_API_KEY = 'test-key';
+  process.env.OPENAI_BASE_URL = '';
+  process.env.OPENAI_MODEL = '';
   console.info = (message) => { infoLine = message; };
-  globalThis.fetch = async (_url, options) => {
+  globalThis.fetch = async (url, options) => {
+    requestUrl = url;
+    requestHeaders = options.headers;
     requestBody = JSON.parse(options.body);
     return new globalThis.Response(JSON.stringify({
       choices: [{
@@ -121,10 +135,10 @@ test('quiz requests strict structured output and keeps inventory tag validation'
           content: JSON.stringify({
             question: 'Which mood fits?',
             options: [
-              { label: 'A', tags: ['shareable'] },
-              { label: 'B', tags: ['shareable'] },
-              { label: 'C', tags: ['shareable'] },
-              { label: 'D', tags: ['shareable'] },
+              { label: 'A', tags: ['playful'] },
+              { label: 'B', tags: ['comfort'] },
+              { label: 'C', tags: ['portable'] },
+              { label: 'D', tags: ['clean'] },
             ],
           }),
         },
@@ -139,33 +153,37 @@ test('quiz requests strict structured output and keeps inventory tag validation'
       constraints: { size: 'any', dietary: 'any' },
       quizHistory: [{ question: 'A previous scenario happens.', answers: ['A', 'B', 'C', 'D'] }],
     });
-    assert.equal(result.source, 'cerebras');
-    assert.equal(requestBody.reasoning_effort, 'low');
-    assert.equal(requestBody.max_completion_tokens, 800);
+    assert.equal(result.source, 'openai');
+    assert.equal(requestUrl, 'https://api.openai.com/v1/chat/completions');
+    assert.equal(requestHeaders.Authorization, 'Bearer test-key');
+    assert.equal(requestBody.model, 'gpt-4.1-nano');
+    assert.equal(requestBody.reasoning_effort, undefined);
+    assert.equal(requestBody.temperature, 0.9);
+    assert.equal(requestBody.max_completion_tokens, 400);
     assert.equal(requestBody.response_format.type, 'json_schema');
     assert.equal(requestBody.response_format.json_schema.name, 'quiz_question');
     assert.equal(requestBody.response_format.json_schema.strict, true);
-    assert.equal(infoLine, '[quiz] Cerebras 200 · gpt-oss-120b · source=cerebras · finish=stop');
+    assert.equal(infoLine, '[quiz] OpenAI 200 · gpt-4.1-nano · source=openai · finish=stop');
     assert.match(requestBody.messages[1].content, /QUESTIONS ALREADY USED THIS SESSION:/);
     assert.match(requestBody.messages[1].content, /A previous scenario happens\./);
     assert.match(requestBody.messages[1].content, /Prefer a question style not used in the previous two questions\./);
-    assert.deepEqual(result.options.map((option) => option.tags), [['shareable'], ['shareable'], ['shareable'], ['shareable']]);
+    assert.deepEqual(result.options.map((option) => option.tags), [['playful'], ['comfort'], ['portable'], ['clean']]);
   } finally {
     globalThis.fetch = previousFetch;
     console.info = previousInfo;
-    if (previousApiKey === undefined) delete process.env.CEREBRAS_API_KEY;
-    else process.env.CEREBRAS_API_KEY = previousApiKey;
-    if (previousBaseUrl === undefined) delete process.env.CEREBRAS_BASE_URL;
-    else process.env.CEREBRAS_BASE_URL = previousBaseUrl;
-    if (previousModel === undefined) delete process.env.CEREBRAS_MODEL;
-    else process.env.CEREBRAS_MODEL = previousModel;
+    if (previousApiKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = previousApiKey;
+    if (previousBaseUrl === undefined) delete process.env.OPENAI_BASE_URL;
+    else process.env.OPENAI_BASE_URL = previousBaseUrl;
+    if (previousModel === undefined) delete process.env.OPENAI_MODEL;
+    else process.env.OPENAI_MODEL = previousModel;
   }
 });
 
-test('quiz falls back when Cerebras returns no content', async () => {
+test('quiz falls back when OpenAI returns no content', async () => {
   const previousFetch = globalThis.fetch;
-  const previousApiKey = process.env.CEREBRAS_API_KEY;
-  process.env.CEREBRAS_API_KEY = 'test-key';
+  const previousApiKey = process.env.OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY = 'test-key';
   globalThis.fetch = async () => new globalThis.Response(JSON.stringify({
     choices: [{ finish_reason: 'length', message: {} }],
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -174,17 +192,34 @@ test('quiz falls back when Cerebras returns no content', async () => {
     const result = await nextQuizQuestion({ budget: 60, topic: 'Style', constraints: { size: 'any', dietary: 'any' } });
     assert.equal(result.source, 'fallback');
     assert.equal(result.options.length, 4);
-    assert.equal(result.options[0].label, 'Ask for the backstory');
+    assert.equal(new Set(result.options.map((option) => option.tags[0])).size, 4);
+    assert.ok(result.options.every((option) => option.label));
   } finally {
     globalThis.fetch = previousFetch;
-    if (previousApiKey === undefined) delete process.env.CEREBRAS_API_KEY;
-    else process.env.CEREBRAS_API_KEY = previousApiKey;
+    if (previousApiKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = previousApiKey;
+  }
+});
+
+test('quiz keeps asking after an answer has no exact stock match', async () => {
+  const previousApiKey = process.env.OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY = '';
+
+  try {
+    const result = await nextQuizQuestion({ budget: 60, topic: 'Style', quizFilters: [['no-stock-has-this-tag']] });
+    assert.equal(result.done, false);
+    assert.equal(result.remainingCount, 0);
+    assert.ok(result.availableCount > 0);
+    assert.equal(new Set(result.options.map((option) => option.tags[0])).size, 4);
+  } finally {
+    if (previousApiKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = previousApiKey;
   }
 });
 
 test('quiz requires four questions and caps the journey at five', async () => {
-  const previousApiKey = process.env.CEREBRAS_API_KEY;
-  process.env.CEREBRAS_API_KEY = '';
+  const previousApiKey = process.env.OPENAI_API_KEY;
+  process.env.OPENAI_API_KEY = '';
   const constraints = { size: 'any', dietary: 'any' };
 
   try {
@@ -196,7 +231,7 @@ test('quiz requires four questions and caps the journey at five', async () => {
     assert.equal(earlyAfterFour.done, true);
     assert.equal(afterFive.done, true);
   } finally {
-    if (previousApiKey === undefined) delete process.env.CEREBRAS_API_KEY;
-    else process.env.CEREBRAS_API_KEY = previousApiKey;
+    if (previousApiKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = previousApiKey;
   }
 });

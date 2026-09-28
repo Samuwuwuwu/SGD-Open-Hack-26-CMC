@@ -11,7 +11,7 @@ export default function HaulSummary({ drop, claimed, onClaim, onBack, onReplay }
       <div className="haul-items">
         {drop.items.map((item, index) => <details className="haul-item" key={item.id}>
           <summary><span className="haul-item-number">{String(index + 1).padStart(2, '0')}</span><ItemArtwork item={item} /><span className="haul-item-title"><small>{words(item.category)} / {item.partner}</small><strong>{item.name}</strong>{item.condition && item.condition !== 'new' && <small>PRE-LOVED · {words(item.condition)}</small>}<span>View details</span></span><span className="haul-expand" aria-hidden="true">+</span></summary>
-          <div className="haul-item-expanded"><div><p className="quiz-kicker">THE FIND</p><h3>{item.name}</h3><p>{item.description}</p></div><dl className="haul-facts">
+          <div className="haul-item-expanded"><div className="haul-item-story"><ItemArtwork item={item} /><div><p className="quiz-kicker">THE FIND</p><h3>{item.name}</h3><p>{item.description}</p>{item.imageSource && <p className="haul-photo-credit">Photo: <a href={item.imageSource} target="_blank" rel="noreferrer">{item.imageCreator}</a> · <a href={item.imageLicenseUrl} target="_blank" rel="noreferrer">{item.imageLicense}</a> ({item.imageEdits})</p>}</div></div><dl className="haul-facts">
             {item.subcategory && <div><dt>Category</dt><dd>{words(item.category)} / {words(item.subcategory)}</dd></div>}
             {item.primary_colour && <div><dt>Primary colour</dt><dd>{words(item.primary_colour)}</dd></div>}
             {item.secondary_colour && <div><dt>Secondary colour</dt><dd>{words(item.secondary_colour)}</dd></div>}
@@ -22,7 +22,7 @@ export default function HaulSummary({ drop, claimed, onClaim, onBack, onReplay }
             {item.category === 'food' && item.expiry_date && <div><dt>Expiry date</dt><dd>{item.expiry_date}</dd></div>}
             {item.condition && <div><dt>Condition</dt><dd>{words(item.condition)}</dd></div>}
             {item.surplus_reason && <div><dt>Why it is surplus</dt><dd>{words(item.surplus_reason)}</dd></div>}
-            <div><dt>Retail partner</dt><dd>{item.partner}</dd></div>
+            <div><dt>Brand</dt><dd>{item.partner}</dd></div>
           </dl></div>
         </details>)}
       </div>
@@ -31,7 +31,7 @@ export default function HaulSummary({ drop, claimed, onClaim, onBack, onReplay }
         <ButtonLift><button className="primary-button" type="button" onClick={onClaim} disabled={claimed}>{claimed ? 'Pick saved' : 'Save this drop'}<IconGlyph name={claimed ? 'check' : 'arrowUpRight'} size={18} /></button></ButtonLift>
         <span className="haul-save-status" role="status">{claimed ? 'Saved for this session.' : ''}</span>
       </div>
-      <p className="microcopy">Demo selection only. No payment or fulfilment takes place.</p>
+      <p className="microcopy">Illustrative inventory and prices. Brands are not partners. No payment or fulfilment takes place.</p>
     </section>
   );
 }

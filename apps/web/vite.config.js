@@ -7,6 +7,7 @@ const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   root: repositoryRoot,
+  publicDir: path.join(repositoryRoot, 'apps/web/public'),
   plugins: [react()],
   resolve: {
     alias: {

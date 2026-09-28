@@ -46,8 +46,17 @@ export function filterInventory({ inventory, budget, constraints = {}, quizFilte
   );
 }
 
-function scoreItem(item, preferences = []) {
-  return preferences.filter((preference) => (item.tags || []).includes(preference)).length * 10;
+function scoreItem(item, preferences, quizFilters, tagCounts, poolSize) {
+  const itemTags = item.tags || [];
+  const preferenceWeight = quizFilters.length ? 4 : 10;
+  const preferenceScore = preferences.filter((tag) => itemTags.includes(tag)).length * preferenceWeight;
+  const quizScore = quizFilters.reduce((score, group) => {
+    const matchingTags = group.filter((tag) => itemTags.includes(tag));
+    if (!matchingTags.length) return score;
+    const rarestCount = Math.min(...matchingTags.map((tag) => tagCounts.get(tag) || poolSize));
+    return score + 12 + Math.round(12 * (1 - rarestCount / poolSize));
+  }, 0);
+  return preferenceScore + quizScore;
 }
 
 const boxProfiles = [
@@ -71,7 +80,11 @@ function bundleOptions(pool, cap, maxItems, usedSkus) {
     while (items.length < maxItems) {
       const remaining = cap - totalCents(items);
       const categories = new Set(items.map((item) => item.category));
-      const rank = (item) => item.matchScore + (categories.has(item.category) ? 0 : 6) - (usedSkus.has(item.sku) ? 8 : 0);
+      const types = new Set(items.map((item) => `${item.category}:${item.subcategory}`));
+      const rank = (item) => item.matchScore
+        + (categories.has(item.category) ? 0 : 6)
+        + (types.has(`${item.category}:${item.subcategory}`) ? 0 : 4)
+        - (usedSkus.has(item.sku) ? 24 : 0);
       const next = eligible.filter((item) => !items.includes(item) && cents(item.surplus_price) <= remaining)
         .sort((a, b) => rank(b) - rank(a) || a.surplus_price - b.surplus_price || a.sku.localeCompare(b.sku))[0];
       if (!next) break;
@@ -85,9 +98,14 @@ function bundleOptions(pool, cap, maxItems, usedSkus) {
 export function buildBoxCandidates({ inventory, budget, preferences = [], constraints = {}, quizFilters = [] }) {
   const numericBudget = Number(budget);
   if (!Number.isFinite(numericBudget) || numericBudget <= 0) return [];
-  const pool = filterInventory({ inventory, budget: numericBudget, constraints }).map((item) => ({
+  const eligible = filterInventory({ inventory, budget: numericBudget, constraints });
+  const tagCounts = new Map();
+  for (const item of eligible) {
+    for (const tag of item.tags || []) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  }
+  const pool = eligible.map((item) => ({
     ...item,
-    matchScore: scoreItem(item, preferences) + (quizFilters.length && matchesQuizFilters(item, quizFilters) ? 12 : 0),
+    matchScore: scoreItem(item, preferences, quizFilters, tagCounts, eligible.length),
   }));
   if (!pool.length) return [];
   const selected = [];
@@ -98,17 +116,26 @@ export function buildBoxCandidates({ inventory, budget, preferences = [], constr
     const fresh = (items) => !selected.some((box) => signature(box.items) === signature(items));
     let options = bundleOptions(pool, cap, profile.maxItems, usedSkus).filter(fresh);
     if (!options.length) options = bundleOptions(pool, cents(numericBudget), profile.maxItems, usedSkus).filter(fresh);
+    options = options.filter((items) => selected.length === 0 || items.some((item) => !usedSkus.has(item.sku)));
     if (!options.length) continue;
     if (options.some((items) => items.some((item) => item.matchScore > 0))) {
       options = options.filter((items) => items.some((item) => item.matchScore > 0));
     }
+    if (numericBudget >= 300 && (profile.theme === 'wild' || profile.theme === 'full')) {
+      const minimumPrice = numericBudget * (profile.theme === 'wild' ? 0.4 : 0.65);
+      const higherValue = options.filter((items) => items.some((item) => item.surplus_price >= minimumPrice));
+      if (higherValue.length) options = higherValue;
+    }
+    const unusedOptions = options.filter((items) => items.every((item) => !usedSkus.has(item.sku)));
+    if (unusedOptions.length) options = unusedOptions;
     const score = (items) => {
-      const overlap = items.filter((item) => usedSkus.has(item.sku)).length / items.length;
+      const overlap = items.filter((item) => usedSkus.has(item.sku)).length;
       const sameCount = selected.some((box) => box.items.length === items.length);
       const samePrice = selected.some((box) => Math.abs(totalCents(box.items) - totalCents(items)) < 200);
       return items.reduce((sum, item) => sum + item.matchScore, 0) / Math.sqrt(items.length)
         + items.length * 5 + new Set(items.map((item) => item.category)).size * 3
-        + totalCents(items) / cap * 4 - overlap * 20 - (sameCount ? 8 : 0) - (samePrice ? 4 : 0);
+        + new Set(items.map((item) => `${item.category}:${item.subcategory}`)).size * 4
+        + totalCents(items) / cap * 4 - overlap * 26 - (sameCount ? 8 : 0) - (samePrice ? 4 : 0);
     };
     options.sort((a, b) => score(b) - score(a) || totalCents(a) - totalCents(b) || signature(a).localeCompare(signature(b)));
     const items = options[0];

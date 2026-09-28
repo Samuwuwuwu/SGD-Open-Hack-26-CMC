@@ -42,7 +42,7 @@ function allergens(value) {
 
 function description(row) {
   const reason = text(row.surplus_reason).replaceAll('_', ' ');
-  return reason ? `Surplus from ${text(row.provider)} due to ${reason}.` : `Surplus from ${text(row.provider)}.`;
+  return reason ? `Illustrative listing for a product by ${text(row.provider)}. Example surplus reason: ${reason}.` : `Illustrative listing for a product by ${text(row.provider)}.`;
 }
 
 function normalizeRow(row) {
@@ -59,6 +59,11 @@ function normalizeRow(row) {
     subcategory: text(row.subcategory),
     product_name: text(row.product_name),
     image_url: text(row.image_url),
+    image_creator: text(row.image_creator),
+    image_source: text(row.image_source),
+    image_license: text(row.image_license),
+    image_license_url: text(row.image_license_url),
+    image_edits: text(row.image_edits),
     description: description(row),
     retail_price: retailPrice,
     surplus_price: discountMode === 'protected' ? retailPrice : number(row.surplus_price),
